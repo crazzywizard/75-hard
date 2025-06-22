@@ -6,6 +6,7 @@ export interface DayEntry {
   no_sugar: boolean;
   no_eating_out: boolean;
   calories_burned: number;
+  steps: number;
   weight?: number;
   notes?: string;
   participant_id?: string;
@@ -13,7 +14,11 @@ export interface DayEntry {
 
 interface EntriesTableProps {
   entries: DayEntry[];
-  updateEntry: (date: string, field: keyof DayEntry, value: string | number | boolean) => void;
+  updateEntry: (
+    date: string,
+    field: keyof Omit<DayEntry, 'id' | 'date'>,
+    value: string | number | boolean
+  ) => void;
   deleteEntry: (date: string) => void;
 }
 
@@ -34,6 +39,9 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
               Calories Burned
+            </th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Steps
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
               Weight (lbs)
@@ -76,6 +84,15 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                     updateEntry(entry.date, 'calories_burned', parseInt(e.target.value) || 0)
                   }
                   className="w-20 p-1 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
+                  min="0"
+                />
+              </td>
+              <td className="px-4 py-3 text-center">
+                <input
+                  type="number"
+                  value={entry.steps}
+                  onChange={(e) => updateEntry(entry.date, 'steps', parseInt(e.target.value) || 0)}
+                  className="w-20 p-1 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
                   min="0"
                 />
               </td>
