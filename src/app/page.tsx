@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ChallengeHeader from '../components/ChallengeHeader';
 import RulesDisplay from '../components/RulesDisplay';
 import StatsDisplay from '../components/StatsDisplay';
@@ -21,7 +21,7 @@ export default function Home() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [currentParticipant, setCurrentParticipant] = useState<Participant | null>(null);
 
-  const fetchParticipants = async () => {
+  const fetchParticipants = useCallback(async () => {
     try {
       const response = await fetch('/api/participants');
       const data = await response.json();
@@ -35,12 +35,12 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to fetch participants:', error);
     }
-  };
+  }, [currentParticipant]);
 
   // Fetch participants on initial load
   useEffect(() => {
     fetchParticipants();
-  }, []);
+  }, [fetchParticipants]);
 
   // Load data from Supabase when participant changes
   useEffect(() => {
