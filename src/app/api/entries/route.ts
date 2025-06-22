@@ -36,3 +36,50 @@ export async function POST(request: Request) {
 
   return NextResponse.json(data);
 }
+
+export async function PUT(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const date = searchParams.get('date');
+  const participantId = searchParams.get('participant_id');
+
+  if (!date || !participantId) {
+    return NextResponse.json({ error: 'Date and Participant ID are required' }, { status: 400 });
+  }
+
+  const body = await request.json();
+
+  const { data, error } = await supabase
+    .from('entries')
+    .update(body)
+    .eq('date', date)
+    .eq('participant_id', participantId)
+    .select();
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json(data);
+}
+
+export async function DELETE(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const date = searchParams.get('date');
+  const participantId = searchParams.get('participant_id');
+
+  if (!date || !participantId) {
+    return NextResponse.json({ error: 'Date and Participant ID are required' }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from('entries')
+    .delete()
+    .eq('date', date)
+    .eq('participant_id', participantId);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return new Response(null, { status: 204 });
+}

@@ -127,11 +127,14 @@ export default function Home() {
   ) => {
     if (!currentParticipant) return;
     try {
-      const response = await fetch(`/api/entries/${date}?participant_id=${currentParticipant.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ [field]: value })
-      });
+      const response = await fetch(
+        `/api/entries?date=${date}&participant_id=${currentParticipant.id}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ [field]: value })
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -154,9 +157,10 @@ export default function Home() {
   const deleteEntry = async (date: string) => {
     if (!currentParticipant) return;
     try {
-      const response = await fetch(`/api/entries/${date}?participant_id=${currentParticipant.id}`, {
-        method: 'DELETE'
-      });
+      const response = await fetch(
+        `/api/entries?date=${date}&participant_id=${currentParticipant.id}`,
+        { method: 'DELETE' }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -228,7 +232,7 @@ export default function Home() {
     ) {
       try {
         const deletePromises = entries.map((e) =>
-          fetch(`/api/entries/${e.date}?participant_id=${currentParticipant.id}`, {
+          fetch(`/api/entries?date=${e.date}&participant_id=${currentParticipant.id}`, {
             method: 'DELETE'
           })
         );
