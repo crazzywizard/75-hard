@@ -17,27 +17,33 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({
   addTodayEntry,
   resetChallenge
 }) => (
-  <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-    <h2 className="text-xl font-semibold mb-4">Add Today&apos;s Entry</h2>
+  <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
+    <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
+      Add Today&apos;s Entry
+    </h2>
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Current Weight (lbs)</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Current Weight (lbs)
+        </label>
         <input
           type="number"
           value={currentWeight || ''}
           onChange={(e) => setCurrentWeight(parseFloat(e.target.value) || 0)}
           placeholder="Enter weight"
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Notes
+        </label>
         <input
           type="text"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Optional notes"
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
         />
       </div>
       <div className="flex items-end">

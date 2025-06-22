@@ -1,8 +1,18 @@
 import { supabase } from '@/lib/supabase';
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 
-export async function GET() {
-  const { data, error } = await supabase.from('entries').select('*');
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const participantId = searchParams.get('participant_id');
+
+  if (!participantId) {
+    return NextResponse.json({ error: 'Participant ID is required' }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from('entries')
+    .select('*')
+    .eq('participant_id', participantId);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -13,6 +23,10 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const body = await request.json();
+
+  if (!body.participant_id) {
+    return NextResponse.json({ error: 'Participant ID is required in the body' }, { status: 400 });
+  }
 
   const { data, error } = await supabase.from('entries').insert([body]).select();
 
