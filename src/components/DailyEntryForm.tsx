@@ -23,7 +23,7 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
       <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-        Add Today's Entry
+        Add Today&apos;s Entry
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
