@@ -11,11 +11,10 @@ import PrizeDisplay from '../components/PrizeDisplay';
 import ParticipantSelector, { Participant } from '../components/ParticipantSelector';
 import { ThemeSwitcher } from '../components/ThemeSwitcher';
 import AddParticipantForm from '../components/AddParticipantForm';
+import EndWeightForm from '../components/EndWeightForm';
 
 export default function Home() {
   const [entries, setEntries] = useState<DayEntry[]>([]);
-  const [currentWeight, setCurrentWeight] = useState<number>(0);
-  const [notes, setNotes] = useState<string>('');
   const [startDate, setStartDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -66,7 +65,6 @@ export default function Home() {
 
     if (currentParticipant) {
       setStartDate(currentParticipant.start_date || '');
-      setCurrentWeight(currentParticipant.start_weight ?? 0);
     }
   }, [currentParticipant]);
 
@@ -74,42 +72,32 @@ export default function Home() {
     const syncLocalAndDb = async () => {
       if (!currentParticipant) return;
       const localStartDate = localStorage.getItem(`75hard-start-date-${currentParticipant.id}`);
-      const localStartWeight = localStorage.getItem(`75hard-start-weight-${currentParticipant.id}`);
       const dbStartDate = currentParticipant.start_date;
-      const dbStartWeight = currentParticipant.start_weight;
 
       // If DB has value but localStorage does not or is different, update localStorage
       if (dbStartDate && dbStartDate !== localStartDate) {
         localStorage.setItem(`75hard-start-date-${currentParticipant.id}`, dbStartDate);
-      }
-      if (
-        dbStartWeight !== null &&
-        dbStartWeight !== undefined &&
-        dbStartWeight.toString() !== localStartWeight
-      ) {
-        localStorage.setItem(
-          `75hard-start-weight-${currentParticipant.id}`,
-          dbStartWeight.toString()
-        );
       }
 
       // If DB is missing but localStorage has value, update DB
       if (!dbStartDate && localStartDate) {
         await updateParticipant({ start_date: localStartDate });
       }
-      if ((dbStartWeight === null || dbStartWeight === undefined) && localStartWeight) {
-        await updateParticipant({ start_weight: parseFloat(localStartWeight) });
-      }
 
       // Always use DB as source of truth for state
       setStartDate(dbStartDate || '');
-      setCurrentWeight(dbStartWeight ?? 0);
     };
     syncLocalAndDb();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentParticipant]);
 
-  const addTodayEntry = async (currentWeight: number, notes: string) => {
+  const addTodayEntry = async (entry: {
+    noSugar: boolean;
+    noEatingOut: boolean;
+    caloriesBurned: number;
+    steps: number;
+    notes: string;
+  }) => {
     if (!currentParticipant) return;
 
     const today = new Date().toISOString().split('T')[0];
@@ -120,13 +108,12 @@ export default function Home() {
 
     const newEntry = {
       date: today,
-      no_sugar: false,
-      no_eating_out: false,
-      calories_burned: 0,
-      weight: currentWeight,
-      notes: notes,
-      participant_id: currentParticipant.id,
-      steps: 0
+      no_sugar: entry.noSugar,
+      no_eating_out: entry.noEatingOut,
+      calories_burned: entry.caloriesBurned,
+      steps: entry.steps,
+      notes: entry.notes,
+      participant_id: currentParticipant.id
     };
 
     try {
@@ -147,7 +134,6 @@ export default function Home() {
       }
       const [createdEntry] = createdEntries;
       setEntries([...entries, createdEntry]);
-      setNotes('');
     } catch (error: unknown) {
       console.error('Failed to add entry:', error);
       if (error instanceof Error) {
@@ -244,9 +230,12 @@ export default function Home() {
   };
 
   const handleStartWeightChange = (weight: number) => {
-    setCurrentWeight(weight);
     localStorage.setItem(`75hard-start-weight-${currentParticipant?.id}`, weight.toString());
     updateParticipant({ start_weight: weight });
+  };
+
+  const handleEndWeightChange = (weight: number) => {
+    updateParticipant({ end_weight: weight });
   };
 
   const startChallenge = () => {
@@ -255,12 +244,12 @@ export default function Home() {
       alert('Please set a start date!');
       return;
     }
-    if (currentWeight <= 0) {
+    if (!currentParticipant.start_weight || currentParticipant.start_weight <= 0) {
       alert('Please enter your starting weight!');
       return;
     }
-    updateParticipant({ start_date: startDate, start_weight: currentWeight });
-    addTodayEntry(currentWeight, notes);
+    updateParticipant({ start_date: startDate });
+    addTodayEntry({ noSugar: false, noEatingOut: false, caloriesBurned: 0, steps: 0, notes: '' });
   };
 
   const getCurrentStreak = (entries: DayEntry[]): number => {
@@ -283,15 +272,6 @@ export default function Home() {
     return streak;
   };
 
-  const getWeightLost = () => {
-    if (!currentParticipant) return 0;
-    if (currentParticipant.start_weight == null || entries.length === 0) return 0;
-    const startWeight = currentParticipant.start_weight;
-    const latestEntry = entries.sort((a, b) => b.date.localeCompare(a.date))[0];
-    if (!latestEntry.weight) return 0;
-    return startWeight - latestEntry.weight;
-  };
-
   const getDaysPassed = () => {
     if (!currentParticipant) return 0;
     if (!currentParticipant.start_date) return 0;
@@ -301,6 +281,9 @@ export default function Home() {
     const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
     return diffInDays;
   };
+
+  const currentStreak = getCurrentStreak(entries);
+  const showEndWeightForm = currentStreak >= 75 && !currentParticipant?.end_weight;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-gray-900 dark:to-black">
@@ -327,18 +310,23 @@ export default function Home() {
             <div className="text-center mb-8">
               <RulesDisplay />
               <StatsDisplay
-                currentStreak={getCurrentStreak(entries)}
-                weightLost={getWeightLost()}
+                currentStreak={currentStreak}
+                startWeight={currentParticipant.start_weight}
+                endWeight={currentParticipant.end_weight}
                 totalDays={entries.length}
                 daysPassed={getDaysPassed()}
               />
             </div>
 
+            {showEndWeightForm && (
+              <EndWeightForm onSetEndWeight={handleEndWeightChange} isVisible={true} />
+            )}
+
             {entries.length === 0 ? (
               <SetupChallenge
                 startDate={startDate}
                 setStartDate={handleStartDateChange}
-                currentWeight={currentWeight}
+                currentWeight={currentParticipant.start_weight ?? 0}
                 setCurrentWeight={handleStartWeightChange}
                 startChallenge={startChallenge}
               />

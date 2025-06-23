@@ -5,6 +5,7 @@ export interface Participant {
   user_id: string;
   start_date?: string | null;
   start_weight?: number | null;
+  end_weight?: number | null;
 }
 
 interface ParticipantSelectorProps {
