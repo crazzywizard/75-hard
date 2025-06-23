@@ -36,11 +36,12 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
           <input
             type="number"
             id="currentWeight"
-            value={currentWeight || ''}
+            value={currentWeight ? currentWeight.toFixed(1) : ''}
             onChange={(e) => setCurrentWeight(Number(e.target.value))}
             className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
             required
             min="1"
+            step="0.1"
           />
         </div>
         <div>

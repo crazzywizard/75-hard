@@ -206,8 +206,7 @@ export default function Home() {
       if (
         entry.no_sugar &&
         entry.no_eating_out &&
-        entry.calories_burned >= 350 &&
-        entry.steps >= 8000
+        (entry.calories_burned >= 350 || entry.steps >= 8000)
       ) {
         streak++;
       } else {
