@@ -8,6 +8,8 @@ interface AddParticipantFormProps {
 
 const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAdded }) => {
   const [userId, setUserId] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [startWeight, setStartWeight] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -25,7 +27,11 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
       const response = await fetch('/api/participants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: userId })
+        body: JSON.stringify({
+          user_id: userId,
+          start_date: startDate || null,
+          start_weight: startWeight ? parseFloat(startWeight) : null
+        })
       });
 
       if (!response.ok) {
@@ -34,6 +40,8 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
       }
 
       setUserId('');
+      setStartDate('');
+      setStartWeight('');
       onParticipantAdded();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -48,7 +56,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
 
   return (
     <div className="mb-6">
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 flex-wrap">
         <input
           type="text"
           value={userId}
@@ -56,6 +64,24 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
           placeholder="New Participant User ID"
           className="flex-grow p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           disabled={isSubmitting}
+        />
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          placeholder="Start Date"
+          className="p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          disabled={isSubmitting}
+        />
+        <input
+          type="number"
+          value={startWeight}
+          onChange={(e) => setStartWeight(e.target.value)}
+          placeholder="Start Weight (lbs)"
+          className="p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          disabled={isSubmitting}
+          min="0"
+          step="0.1"
         />
         <button
           type="submit"

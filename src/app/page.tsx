@@ -65,11 +65,48 @@ export default function Home() {
     fetchEntries();
 
     if (currentParticipant) {
-      const savedStartDate = localStorage.getItem(`75hard-start-date-${currentParticipant.id}`);
-      const savedWeight = localStorage.getItem(`75hard-start-weight-${currentParticipant.id}`);
-      setStartDate(savedStartDate || '');
-      setCurrentWeight(savedWeight ? parseFloat(savedWeight) : 0);
+      setStartDate(currentParticipant.start_date || '');
+      setCurrentWeight(currentParticipant.start_weight ?? 0);
     }
+  }, [currentParticipant]);
+
+  useEffect(() => {
+    const syncLocalAndDb = async () => {
+      if (!currentParticipant) return;
+      const localStartDate = localStorage.getItem(`75hard-start-date-${currentParticipant.id}`);
+      const localStartWeight = localStorage.getItem(`75hard-start-weight-${currentParticipant.id}`);
+      const dbStartDate = currentParticipant.start_date;
+      const dbStartWeight = currentParticipant.start_weight;
+
+      // If DB has value but localStorage does not or is different, update localStorage
+      if (dbStartDate && dbStartDate !== localStartDate) {
+        localStorage.setItem(`75hard-start-date-${currentParticipant.id}`, dbStartDate);
+      }
+      if (
+        dbStartWeight !== null &&
+        dbStartWeight !== undefined &&
+        dbStartWeight.toString() !== localStartWeight
+      ) {
+        localStorage.setItem(
+          `75hard-start-weight-${currentParticipant.id}`,
+          dbStartWeight.toString()
+        );
+      }
+
+      // If DB is missing but localStorage has value, update DB
+      if (!dbStartDate && localStartDate) {
+        await updateParticipant({ start_date: localStartDate });
+      }
+      if ((dbStartWeight === null || dbStartWeight === undefined) && localStartWeight) {
+        await updateParticipant({ start_weight: parseFloat(localStartWeight) });
+      }
+
+      // Always use DB as source of truth for state
+      setStartDate(dbStartDate || '');
+      setCurrentWeight(dbStartWeight ?? 0);
+    };
+    syncLocalAndDb();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentParticipant]);
 
   const addTodayEntry = async (currentWeight: number, notes: string) => {
@@ -181,6 +218,37 @@ export default function Home() {
     }
   };
 
+  const updateParticipant = async (fields: Partial<Participant>) => {
+    if (!currentParticipant) return;
+    try {
+      const response = await fetch('/api/participants', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: currentParticipant.id, ...fields })
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update participant');
+      }
+      // Refetch participants to update state
+      fetchParticipants();
+    } catch (error) {
+      console.error('Failed to update participant:', error);
+    }
+  };
+
+  const handleStartDateChange = (date: string) => {
+    setStartDate(date);
+    localStorage.setItem(`75hard-start-date-${currentParticipant?.id}`, date);
+    updateParticipant({ start_date: date });
+  };
+
+  const handleStartWeightChange = (weight: number) => {
+    setCurrentWeight(weight);
+    localStorage.setItem(`75hard-start-weight-${currentParticipant?.id}`, weight.toString());
+    updateParticipant({ start_weight: weight });
+  };
+
   const startChallenge = () => {
     if (!currentParticipant) return;
     if (!startDate) {
@@ -191,8 +259,7 @@ export default function Home() {
       alert('Please enter your starting weight!');
       return;
     }
-    localStorage.setItem(`75hard-start-date-${currentParticipant.id}`, startDate);
-    localStorage.setItem(`75hard-start-weight-${currentParticipant.id}`, currentWeight.toString());
+    updateParticipant({ start_date: startDate, start_weight: currentWeight });
     addTodayEntry(currentWeight, notes);
   };
 
@@ -218,23 +285,17 @@ export default function Home() {
 
   const getWeightLost = () => {
     if (!currentParticipant) return 0;
-    const startWeightStr = localStorage.getItem(`75hard-start-weight-${currentParticipant.id}`);
-    if (!startWeightStr || entries.length === 0) return 0;
-
-    const startWeight = parseFloat(startWeightStr);
+    if (currentParticipant.start_weight == null || entries.length === 0) return 0;
+    const startWeight = currentParticipant.start_weight;
     const latestEntry = entries.sort((a, b) => b.date.localeCompare(a.date))[0];
-
     if (!latestEntry.weight) return 0;
-
     return startWeight - latestEntry.weight;
   };
 
   const getDaysPassed = () => {
     if (!currentParticipant) return 0;
-    const startDate = localStorage.getItem(`75hard-start-date-${currentParticipant.id}`);
-    if (!startDate) return 0;
-
-    const start = new Date(startDate).getTime();
+    if (!currentParticipant.start_date) return 0;
+    const start = new Date(currentParticipant.start_date).getTime();
     const end = new Date().getTime();
     const diffInTime = Math.abs(end - start);
     const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
@@ -276,9 +337,9 @@ export default function Home() {
             {entries.length === 0 ? (
               <SetupChallenge
                 startDate={startDate}
-                setStartDate={setStartDate}
+                setStartDate={handleStartDateChange}
                 currentWeight={currentWeight}
-                setCurrentWeight={setCurrentWeight}
+                setCurrentWeight={handleStartWeightChange}
                 startChallenge={startChallenge}
               />
             ) : (

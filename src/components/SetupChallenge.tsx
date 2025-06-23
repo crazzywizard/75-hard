@@ -46,7 +46,8 @@ const SetupChallenge: React.FC<SetupChallengeProps> = ({
       <div className="flex items-end">
         <button
           onClick={startChallenge}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300"
+          disabled={!startDate || !currentWeight}
         >
           Start Challenge
         </button>

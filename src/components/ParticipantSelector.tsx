@@ -3,6 +3,8 @@ import React from 'react';
 export interface Participant {
   id: string | number;
   user_id: string;
+  start_date?: string | null;
+  start_weight?: number | null;
 }
 
 interface ParticipantSelectorProps {
