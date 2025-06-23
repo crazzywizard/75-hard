@@ -79,7 +79,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
               <td className="px-4 py-3 text-center">
                 <input
                   type="number"
-                  value={entry.calories_burned}
+                  value={entry.calories_burned ?? ''}
                   onChange={(e) =>
                     updateEntry(entry.date, 'calories_burned', parseInt(e.target.value) || 0)
                   }
@@ -90,7 +90,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
               <td className="px-4 py-3 text-center">
                 <input
                   type="number"
-                  value={entry.steps}
+                  value={entry.steps ?? ''}
                   onChange={(e) => updateEntry(entry.date, 'steps', parseInt(e.target.value) || 0)}
                   className="w-20 p-1 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-sky-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
                   min="0"
