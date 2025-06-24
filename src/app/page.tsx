@@ -271,11 +271,17 @@ export default function Home() {
     return streak;
   };
 
+  // Helper to parse YYYY-MM-DD as local date
+  function parseLocalDate(dateStr: string) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  }
+
   const getDaysPassed = () => {
     if (!currentParticipant) return 0;
     if (!currentParticipant.start_date) return 0;
-    const start = new Date(currentParticipant.start_date).getTime();
-    const end = new Date().getTime();
+    const start = parseLocalDate(currentParticipant.start_date).getTime();
+    const end = new Date().setHours(0, 0, 0, 0); // today at local midnight
     const diffInTime = Math.abs(end - start);
     const diffInDays = Math.ceil(diffInTime / (1000 * 3600 * 24));
     return diffInDays;
