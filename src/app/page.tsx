@@ -19,22 +19,24 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [currentParticipant, setCurrentParticipant] = useState<Participant | null>(null);
+  const [currentParticipantId, setCurrentParticipantId] = useState<string | null>(null);
 
   const fetchParticipants = useCallback(async () => {
     try {
       const response = await fetch('/api/participants');
       const data = await response.json();
       if (Array.isArray(data)) {
-        setParticipants(data);
-        // If there's no current participant and we fetched some, default to the first one
-        if (!currentParticipant && data.length > 0) {
-          setCurrentParticipant(data[0]);
+        const sorted = data.sort((a, b) => a.user_id.localeCompare(b.user_id));
+        setParticipants(sorted);
+        // If there's no current participant and we fetched some, default to the first in sorted list
+        if (!currentParticipantId && sorted.length > 0) {
+          setCurrentParticipantId(sorted[0].id);
         }
       }
     } catch (error) {
       console.error('Failed to fetch participants:', error);
     }
-  }, [currentParticipant]);
+  }, [currentParticipantId]);
 
   // Fetch participants on initial load
   useEffect(() => {
