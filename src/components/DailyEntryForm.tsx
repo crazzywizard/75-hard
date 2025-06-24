@@ -13,8 +13,8 @@ interface DailyEntryFormProps {
 const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
   const [noSugar, setNoSugar] = useState(false);
   const [noEatingOut, setNoEatingOut] = useState(false);
-  const [caloriesBurned, setCaloriesBurned] = useState(0);
-  const [steps, setSteps] = useState(0);
+  const [caloriesBurned, setCaloriesBurned] = useState('');
+  const [steps, setSteps] = useState('');
   const [notes, setNotes] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -22,15 +22,15 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
     onAddEntry({
       noSugar,
       noEatingOut,
-      caloriesBurned,
-      steps,
+      caloriesBurned: caloriesBurned === '' ? 0 : Number(caloriesBurned),
+      steps: steps === '' ? 0 : Number(steps),
       notes
     });
     // Reset fields after submission if needed
     setNoSugar(false);
     setNoEatingOut(false);
-    setCaloriesBurned(0);
-    setSteps(0);
+    setCaloriesBurned('');
+    setSteps('');
     setNotes('');
   };
 
@@ -70,7 +70,7 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
               type="number"
               id="caloriesBurned"
               value={caloriesBurned}
-              onChange={(e) => setCaloriesBurned(Number(e.target.value))}
+              onChange={(e) => setCaloriesBurned(e.target.value)}
               className="w-full sm:w-20 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
               min="0"
             />
@@ -86,7 +86,7 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
               type="number"
               id="steps"
               value={steps}
-              onChange={(e) => setSteps(Number(e.target.value))}
+              onChange={(e) => setSteps(e.target.value)}
               className="w-full sm:w-20 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
               min="0"
             />

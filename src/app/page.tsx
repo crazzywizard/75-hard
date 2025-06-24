@@ -100,14 +100,13 @@ export default function Home() {
   }) => {
     if (!currentParticipant) return;
 
-    const today = new Date().toISOString().split('T')[0];
-    if (entries.find((entry) => entry.date === today)) {
+    if (entries.find((entryObj) => entryObj.date === todayStr)) {
       alert('Entry for today already exists!');
       return;
     }
 
     const newEntry = {
-      date: today,
+      date: todayStr,
       no_sugar: entry.noSugar,
       no_eating_out: entry.noEatingOut,
       calories_burned: entry.caloriesBurned,
