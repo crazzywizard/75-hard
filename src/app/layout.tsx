@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+import InstallPWAButton from '@/components/InstallPWAButton';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -30,6 +31,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <InstallPWAButton />
         </ThemeProvider>
       </body>
     </html>
