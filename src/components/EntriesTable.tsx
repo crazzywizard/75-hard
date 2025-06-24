@@ -282,7 +282,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                         <>
                           <button
                             onClick={() => startEdit(entry)}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 border shadow-sm rounded px-3 py-1"
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 border shadow-sm rounded px-3 py-1 mr-2"
                           >
                             Update
                           </button>

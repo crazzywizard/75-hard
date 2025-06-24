@@ -40,30 +40,26 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
         Add Today&apos;s Entry
       </h2>
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Checkboxes row: stacked on mobile, row on sm+ */}
-        <div className="flex flex-col sm:flex-row gap-4 w-full">
-          <label className="flex items-center gap-2 w-full sm:flex-1 min-w-[120px] text-sm font-medium text-gray-700 dark:text-gray-300">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:gap-4 w-full">
+          <label className="flex items-center gap-3 w-full sm:w-auto sm:flex-1 min-w-[120px] text-sm font-medium text-gray-700 dark:text-gray-300 px-2 py-2">
             <input
               type="checkbox"
               checked={noSugar}
               onChange={(e) => setNoSugar(e.target.checked)}
-              className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              className="w-6 h-6 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             />
             No Sugar
           </label>
-          <label className="flex items-center gap-2 w-full sm:flex-1 min-w-[140px] text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="flex items-center gap-3 w-full sm:w-auto sm:flex-1 min-w-[140px] text-sm font-medium text-gray-700 dark:text-gray-300 px-2 py-2">
             <input
               type="checkbox"
               checked={noEatingOut}
               onChange={(e) => setNoEatingOut(e.target.checked)}
-              className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+              className="w-6 h-6 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             />
             No Eating Out
           </label>
-        </div>
-        {/* Calories/Steps row: always side by side */}
-        <div className="flex flex-row gap-4 w-full">
-          <div className="flex items-center gap-2 w-full sm:flex-1 min-w-[160px]">
+          <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-1 min-w-[160px] px-2 py-2">
             <label
               htmlFor="caloriesBurned"
               className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-0"
@@ -79,7 +75,7 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
               min="0"
             />
           </div>
-          <div className="flex items-center gap-2 w-full sm:flex-1 min-w-[120px]">
+          <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-1 min-w-[120px] px-2 py-2">
             <label
               htmlFor="steps"
               className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-0"

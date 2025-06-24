@@ -285,6 +285,12 @@ export default function Home() {
   const currentStreak = getCurrentStreak(entries);
   const showEndWeightForm = currentStreak >= 75 && !currentParticipant?.end_weight;
 
+  // Calculate today's date in local time, format YYYY-MM-DD
+  const today = new Date();
+  const pad = (n: number) => n.toString().padStart(2, '0');
+  const todayStr = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+  const hasTodayEntry = entries.some((entry) => entry.date === todayStr);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 dark:from-gray-900 dark:to-black">
       <div className="max-w-7xl mx-auto relative">
@@ -332,9 +338,11 @@ export default function Home() {
               />
             ) : (
               <>
-                <div className="mt-6">
-                  <DailyEntryForm onAddEntry={addTodayEntry} />
-                </div>
+                {!hasTodayEntry && (
+                  <div className="mt-6">
+                    <DailyEntryForm onAddEntry={addTodayEntry} />
+                  </div>
+                )}
 
                 <EntriesTable
                   entries={entries.sort((a, b) => b.date.localeCompare(a.date))}
