@@ -8,7 +8,6 @@ interface AddParticipantFormProps {
 
 const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAdded }) => {
   const [userId, setUserId] = useState('');
-  const [startDate, setStartDate] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -23,12 +22,18 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
     setError('');
 
     try {
+      // Get today's date in YYYY-MM-DD format (local time)
+      const today = new Date();
+      const localDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000))
+        .toISOString()
+        .split('T')[0];
+
       const response = await fetch('/api/participants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          start_date: startDate || null
+          start_date: localDate
         })
       });
 
@@ -38,7 +43,6 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
       }
 
       setUserId('');
-      setStartDate('');
       onParticipantAdded();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -60,14 +64,6 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
           onChange={(e) => setUserId(e.target.value)}
           placeholder="New Participant User ID"
           className="flex-grow p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          disabled={isSubmitting}
-        />
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          placeholder="Start Date"
-          className="p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           disabled={isSubmitting}
         />
         <button
