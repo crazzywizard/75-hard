@@ -12,15 +12,19 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { user_id, start_date } = await request.json();
+  const { user_id, start_date, start_weight } = await request.json();
 
   if (!user_id) {
     return NextResponse.json({ error: 'Participant user_id is required' }, { status: 400 });
   }
 
+  const insertData: { user_id: string; start_date?: string; start_weight?: number } = { user_id };
+  if (start_date !== undefined) insertData.start_date = start_date;
+  if (start_weight !== undefined) insertData.start_weight = start_weight;
+
   const { data, error } = await supabase
     .from('participants')
-    .insert([{ user_id, start_date }])
+    .insert([insertData])
     .select();
 
   if (error) {

@@ -8,6 +8,7 @@ interface AddParticipantFormProps {
 
 const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAdded }) => {
   const [userId, setUserId] = useState('');
+  const [startWeight, setStartWeight] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -15,6 +16,10 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
     e.preventDefault();
     if (!userId.trim()) {
       setError('Please enter a User ID.');
+      return;
+    }
+    if (!startWeight || parseFloat(startWeight) <= 0) {
+      setError('Please enter a valid starting weight.');
       return;
     }
 
@@ -33,7 +38,8 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          start_date: localDate
+          start_date: localDate,
+          start_weight: parseFloat(startWeight)
         })
       });
 
@@ -43,6 +49,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
       }
 
       setUserId('');
+      setStartWeight('');
       onParticipantAdded();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -57,22 +64,34 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
 
   return (
     <div className="mb-6">
-      <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 flex-wrap">
-        <input
-          type="text"
-          value={userId}
-          onChange={(e) => setUserId(e.target.value)}
-          placeholder="New Participant User ID"
-          className="flex-grow p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          disabled={isSubmitting}
-        />
-        <button
-          type="submit"
-          className="bg-indigo-600 text-white py-2 px-6 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-indigo-400"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? 'Adding...' : 'Add Participant'}
-        </button>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+          <input
+            type="text"
+            value={userId}
+            onChange={(e) => setUserId(e.target.value)}
+            placeholder="New Participant User ID"
+            className="flex-grow p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            disabled={isSubmitting}
+          />
+          <input
+            type="number"
+            value={startWeight}
+            onChange={(e) => setStartWeight(e.target.value)}
+            placeholder="Starting Weight (lbs)"
+            step="0.1"
+            min="0"
+            className="flex-grow sm:flex-grow-0 sm:w-48 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            disabled={isSubmitting}
+          />
+          <button
+            type="submit"
+            className="bg-indigo-600 text-white py-2 px-6 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-indigo-400"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Adding...' : 'Add Participant'}
+          </button>
+        </div>
       </form>
       {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
     </div>
