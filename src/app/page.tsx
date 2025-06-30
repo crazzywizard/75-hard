@@ -26,11 +26,11 @@ export default function Home() {
       const response = await fetch('/api/participants');
       const data = await response.json();
       if (Array.isArray(data)) {
-        const sorted = data.sort((a, b) => a.user_id.localeCompare(b.user_id));
+        const sorted = data.sort((a: Participant, b: Participant) => a.user_id.localeCompare(b.user_id));
         setParticipants(sorted);
         // If there's no current participant and we fetched some, default to the first in sorted list
         if (!currentParticipantId && sorted.length > 0) {
-          setCurrentParticipantId(sorted[0].id);
+          setCurrentParticipantId(sorted[0].id.toString());
         }
       }
     } catch (error) {
@@ -42,6 +42,16 @@ export default function Home() {
   useEffect(() => {
     fetchParticipants();
   }, [fetchParticipants]);
+
+  // Update currentParticipant when currentParticipantId changes
+  useEffect(() => {
+    if (currentParticipantId && participants.length > 0) {
+      const participant = participants.find((p: Participant) => p.id === currentParticipantId);
+      if (participant) {
+        setCurrentParticipant(participant);
+      }
+    }
+  }, [currentParticipantId, participants]);
 
   // Load data from Supabase when participant changes
   useEffect(() => {
@@ -240,7 +250,10 @@ export default function Home() {
   };
 
   const startChallenge = () => {
-    if (!currentParticipant) return;
+    if (!currentParticipant) {
+      alert('Please select a participant first!');
+      return;
+    }
     if (!startDate) {
       alert('Please set a start date!');
       return;
@@ -307,7 +320,10 @@ export default function Home() {
         <ParticipantSelector
           participants={participants}
           currentParticipant={currentParticipant}
-          setCurrentParticipant={setCurrentParticipant}
+          setCurrentParticipant={(participant: Participant) => {
+            setCurrentParticipant(participant);
+            setCurrentParticipantId(participant.id.toString());
+          }}
         />
 
         {loading || !currentParticipant ? (

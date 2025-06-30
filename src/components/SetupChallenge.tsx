@@ -37,9 +37,14 @@ const SetupChallenge: React.FC<SetupChallengeProps> = ({
         </label>
         <input
           type="number"
-          value={currentWeight || ''}
-          onChange={(e) => setCurrentWeight(parseFloat(e.target.value) || 0)}
+          value={currentWeight > 0 ? currentWeight : ''}
+          onChange={(e) => {
+            const value = e.target.value;
+            setCurrentWeight(value === '' ? 0 : parseFloat(value) || 0);
+          }}
           placeholder="Enter weight"
+          step="0.1"
+          min="0"
           className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
         />
       </div>

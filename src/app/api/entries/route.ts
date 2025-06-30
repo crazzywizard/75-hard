@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { NextResponse, NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
@@ -9,16 +9,26 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Participant ID is required' }, { status: 400 });
   }
 
-  const { data, error } = await supabase
-    .from('entries')
-    .select('*')
-    .eq('participant_id', participantId);
-
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!isSupabaseConfigured()) {
+    console.warn('Supabase not configured, returning empty entries');
+    return NextResponse.json([]);
   }
 
-  return NextResponse.json(data);
+  try {
+    const { data, error } = await supabase
+      .from('entries')
+      .select('*')
+      .eq('participant_id', participantId);
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.warn('Supabase error, returning empty entries:', error);
+    return NextResponse.json([]);
+  }
 }
 
 export async function POST(request: Request) {
