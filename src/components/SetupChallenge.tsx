@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface SetupChallengeProps {
   startDate: string;
@@ -15,14 +15,28 @@ const SetupChallenge: React.FC<SetupChallengeProps> = ({
   setCurrentWeight,
   startChallenge
 }) => {
+  // Local state for the input value to allow typing
+  const [weightInput, setWeightInput] = useState<string>('');
+
+  // Initialize local input state when currentWeight changes from parent
+  useEffect(() => {
+    if (currentWeight > 0) {
+      setWeightInput(currentWeight.toString());
+    } else {
+      setWeightInput('');
+    }
+  }, [currentWeight]);
+
   const handleWeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
+    setWeightInput(value); // Always update the displayed value
+
+    // Update parent state with parsed value
     if (value === '') {
-      // Don't set to 0 when empty, keep it undefined/null
       setCurrentWeight(0);
     } else {
       const weight = parseFloat(value);
-      if (!isNaN(weight) && weight > 0) {
+      if (!isNaN(weight)) {
         setCurrentWeight(weight);
       }
     }
@@ -54,7 +68,7 @@ const SetupChallenge: React.FC<SetupChallengeProps> = ({
           </label>
           <input
             type="number"
-            value={currentWeight > 0 ? currentWeight : ''}
+            value={weightInput}
             onChange={handleWeightChange}
             placeholder="Enter weight"
             min="1"
