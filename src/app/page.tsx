@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import ChallengeHeader from '../components/ChallengeHeader';
 import RulesDisplay from '../components/RulesDisplay';
 import StatsDisplay from '../components/StatsDisplay';
-import SetupChallenge from '../components/SetupChallenge';
+// import SetupChallenge from '../components/SetupChallenge'; // Removed - no longer using SetupChallenge
 import DailyEntryForm from '../components/DailyEntryForm';
 import EntriesTable, { DayEntry } from '../components/EntriesTable';
 import PrizeDisplay from '../components/PrizeDisplay';
@@ -15,7 +15,6 @@ import EndWeightForm from '../components/EndWeightForm';
 
 export default function Home() {
   const [entries, setEntries] = useState<DayEntry[]>([]);
-  const [startDate, setStartDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [currentParticipant, setCurrentParticipant] = useState<Participant | null>(null);
@@ -64,10 +63,6 @@ export default function Home() {
     };
 
     fetchEntries();
-
-    if (currentParticipant) {
-      setStartDate(currentParticipant.start_date || '');
-    }
   }, [currentParticipant]);
 
   useEffect(() => {
@@ -86,8 +81,7 @@ export default function Home() {
         await updateParticipant({ start_date: localStartDate });
       }
 
-      // Always use DB as source of truth for state
-      setStartDate(dbStartDate || '');
+      // DB is source of truth for start date (no longer needed in local state)
     };
     syncLocalAndDb();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -224,33 +218,8 @@ export default function Home() {
     }
   };
 
-  const handleStartDateChange = (date: string) => {
-    setStartDate(date);
-    localStorage.setItem(`75hard-start-date-${currentParticipant?.id}`, date);
-    updateParticipant({ start_date: date });
-  };
-
-  const handleStartWeightChange = (weight: number) => {
-    localStorage.setItem(`75hard-start-weight-${currentParticipant?.id}`, weight.toString());
-    updateParticipant({ start_weight: weight });
-  };
-
   const handleEndWeightChange = (weight: number) => {
     updateParticipant({ end_weight: weight });
-  };
-
-  const startChallenge = () => {
-    if (!currentParticipant) return;
-    if (!startDate) {
-      alert('Please set a start date!');
-      return;
-    }
-    if (!currentParticipant.start_weight || currentParticipant.start_weight <= 0) {
-      alert('Please enter your starting weight!');
-      return;
-    }
-    updateParticipant({ start_date: startDate });
-    addTodayEntry({ noSugar: false, noEatingOut: false, caloriesBurned: 0, steps: 0, notes: '' });
   };
 
   const getCurrentStreak = (entries: DayEntry[]): number => {
@@ -335,29 +304,21 @@ export default function Home() {
               <EndWeightForm onSetEndWeight={handleEndWeightChange} isVisible={true} />
             )}
 
-            {entries.length === 0 ? (
-              <SetupChallenge
-                startDate={startDate}
-                setStartDate={handleStartDateChange}
-                currentWeight={currentParticipant.start_weight ?? 0}
-                setCurrentWeight={handleStartWeightChange}
-                startChallenge={startChallenge}
-              />
-            ) : (
-              <>
-                {!hasTodayEntry && (
-                  <div className="mt-6">
-                    <DailyEntryForm onAddEntry={addTodayEntry} />
-                  </div>
-                )}
+            <>
+              {!hasTodayEntry && (
+                <div className="mt-6">
+                  <DailyEntryForm onAddEntry={addTodayEntry} />
+                </div>
+              )}
 
+              {entries.length > 0 && (
                 <EntriesTable
                   entries={entries.sort((a, b) => b.date.localeCompare(a.date))}
                   updateEntry={updateEntry}
                   deleteEntry={deleteEntry}
                 />
-              </>
-            )}
+              )}
+            </>
           </>
         )}
 
