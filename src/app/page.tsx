@@ -328,6 +328,7 @@ export default function Home() {
                 endWeight={currentParticipant.end_weight}
                 totalDays={entries.length}
                 daysPassed={getDaysPassed()}
+                onStartWeightChange={handleStartWeightChange}
               />
             </div>
 
