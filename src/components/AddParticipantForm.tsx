@@ -8,13 +8,25 @@ interface AddParticipantFormProps {
 
 const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAdded }) => {
   const [userId, setUserId] = useState('');
+  const [startWeight, setStartWeight] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!userId.trim()) {
-      setError('Please enter a User ID.');
+      setError('Please enter a participant name.');
+      return;
+    }
+
+    if (!startWeight.trim()) {
+      setError('Please enter a starting weight.');
+      return;
+    }
+
+    const weight = parseFloat(startWeight);
+    if (isNaN(weight) || weight <= 0) {
+      setError('Please enter a valid starting weight greater than 0.');
       return;
     }
 
@@ -33,7 +45,8 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: userId,
-          start_date: localDate
+          start_date: localDate,
+          start_weight: weight
         })
       });
 
@@ -43,6 +56,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
       }
 
       setUserId('');
+      setStartWeight('');
       onParticipantAdded();
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -62,8 +76,18 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
           type="text"
           value={userId}
           onChange={(e) => setUserId(e.target.value)}
-          placeholder="New Participant User ID"
+          placeholder="Participant Name"
           className="flex-grow p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          disabled={isSubmitting}
+        />
+        <input
+          type="number"
+          value={startWeight}
+          onChange={(e) => setStartWeight(e.target.value)}
+          placeholder="Starting Weight (lbs)"
+          min="1"
+          step="0.1"
+          className="w-full sm:w-40 p-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           disabled={isSubmitting}
         />
         <button
