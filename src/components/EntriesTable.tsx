@@ -131,14 +131,13 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                     {editValues.ate_out && (
                       <div className="flex items-center gap-2">
                         <label className="text-xs text-gray-600 dark:text-gray-400">Calories:</label>
-                        <input
-                          type="number"
-                          value={editValues.eating_out_calories ?? ''}
-                          onChange={(e) => handleFieldChange('eating_out_calories', parseInt(e.target.value) || 0)}
-                          className="w-20 p-1 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
-                          min="0"
-                          max="2000"
-                        />
+                                                 <input
+                           type="number"
+                           value={editValues.eating_out_calories ?? ''}
+                           onChange={(e) => handleFieldChange('eating_out_calories', parseInt(e.target.value) || 0)}
+                           className="w-20 p-1 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
+                           min="0"
+                         />
                       </div>
                     )}
                   </div>
@@ -290,15 +289,14 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                           Ate Out
                         </label>
                         {editValues.ate_out && (
-                          <input
-                            type="number"
-                            value={editValues.eating_out_calories ?? ''}
-                            onChange={(e) => handleFieldChange('eating_out_calories', parseInt(e.target.value) || 0)}
-                            className="w-16 p-1 text-xs text-center border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
-                            min="0"
-                            max="2000"
-                            placeholder="cal"
-                          />
+                                                     <input
+                             type="number"
+                             value={editValues.eating_out_calories ?? ''}
+                             onChange={(e) => handleFieldChange('eating_out_calories', parseInt(e.target.value) || 0)}
+                             className="w-16 p-1 text-xs text-center border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
+                             min="0"
+                             placeholder="cal"
+                           />
                         )}
                       </div>
                     ) : (

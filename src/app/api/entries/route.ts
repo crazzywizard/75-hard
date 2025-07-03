@@ -35,13 +35,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Participant ID is required in the body' }, { status: 400 });
   }
 
-  // Validate eating out rule if provided
-  if (body.ate_out && body.eating_out_calories && body.eating_out_calories >= 500) {
-    return NextResponse.json({ 
-      error: 'If eating out, calories must be less than 500' 
-    }, { status: 400 });
-  }
-
   // Ensure new fields have defaults
   const entryData = {
     ...body,
@@ -68,26 +61,6 @@ export async function PUT(request: NextRequest) {
   }
 
   const body = await request.json();
-
-  // Validate eating out rule if being updated
-  if (body.ate_out !== undefined || body.eating_out_calories !== undefined) {
-    // Get current entry to check combined rule
-    const { data: currentEntry } = await supabase
-      .from('entries')
-      .select('ate_out, eating_out_calories')
-      .eq('date', date)
-      .eq('participant_id', participantId)
-      .single();
-
-    const newAteOut = body.ate_out !== undefined ? body.ate_out : currentEntry?.ate_out;
-    const newCalories = body.eating_out_calories !== undefined ? body.eating_out_calories : currentEntry?.eating_out_calories;
-
-    if (newAteOut && newCalories && newCalories >= 500) {
-      return NextResponse.json({ 
-        error: 'If eating out, calories must be less than 500' 
-      }, { status: 400 });
-    }
-  }
 
   const { data, error } = await supabase
     .from('entries')

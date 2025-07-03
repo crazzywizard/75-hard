@@ -22,12 +22,6 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate eating out rule: if ate out, calories must be < 500
-    if (ateOut && (eatingOutCalories === '' || Number(eatingOutCalories) >= 500)) {
-      alert('If eating out, calories must be less than 500!');
-      return;
-    }
-    
     onAddEntry({
       noSugar,
       ateOut,
@@ -93,24 +87,23 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
                   id="eatingOutCalories"
                   value={eatingOutCalories}
                   onChange={(e) => setEatingOutCalories(e.target.value)}
-                  className={`w-20 p-1 text-center border rounded-md focus:ring-2 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600 ${
-                    isEatingOutRuleSatisfied 
-                      ? 'border-gray-300 focus:ring-green-500' 
-                      : 'border-red-500 focus:ring-red-500'
-                  }`}
-                  min="0"
-                  max="2000"
-                  placeholder="0"
-                  required
+                                     className={`w-20 p-1 text-center border rounded-md focus:ring-2 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600 ${
+                     isEatingOutRuleSatisfied 
+                       ? 'border-gray-300 focus:ring-green-500' 
+                       : 'border-red-500 focus:ring-red-500'
+                   }`}
+                   min="0"
+                   placeholder="0"
+                   required
                 />
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  (must be &lt;500)
-                </span>
+                                 <span className="text-xs text-gray-500 dark:text-gray-400">
+                   (rule: &lt;500 cal)
+                 </span>
               </div>
             )}
             {ateOut && !isEatingOutRuleSatisfied && (
               <p className="text-xs text-red-600 dark:text-red-400 ml-9">
-                Must be less than 500 calories!
+                ⚠️ Warning: This will break your streak! Rule requires &lt;500 calories.
               </p>
             )}
           </div>

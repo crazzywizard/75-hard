@@ -7,6 +7,10 @@ This update enhances the eating out tracking from a simple boolean to a more sop
 **Before:** Simple checkbox for "No Eating Out"
 **After:** "No eating out OR if eating out, less than 500 calories"
 
+## Behavior Change
+
+**Important:** Entries with ≥500 calories when eating out are now **allowed** but will **break the streak**. This provides better user experience by letting users log what actually happened rather than preventing the entry entirely.
+
 ## Database Migration Required
 
 Before using the updated application, you need to run the database migration to add the new fields.
@@ -26,10 +30,10 @@ UPDATE entries
 SET ate_out = NOT no_eating_out,
     eating_out_calories = 0;
 
--- Add a check constraint to ensure eating_out_calories is reasonable
+-- Add a check constraint to ensure eating_out_calories is reasonable (non-negative)
 ALTER TABLE entries 
 ADD CONSTRAINT check_eating_out_calories 
-CHECK (eating_out_calories >= 0 AND eating_out_calories <= 5000);
+CHECK (eating_out_calories >= 0);
 ```
 
 ### Step 2: Verify Migration
@@ -59,6 +63,7 @@ LIMIT 5;
 2. **Smart Validation**: 
    - The rule is satisfied if: `!ate_out OR (ate_out AND eating_out_calories < 500)`
    - Visual feedback shows green for satisfied rule, red for violations
+   - Entries with ≥500 calories are allowed but will break the streak
 
 3. **Enhanced Table Display**:
    - Shows "No" if didn't eat out
@@ -78,8 +83,9 @@ The streak calculation now uses the enhanced rule:
 ## Testing
 
 After migration, test the following:
-1. Add a new entry without eating out
-2. Add a new entry with eating out <500 calories  
-3. Add a new entry with eating out >=500 calories (should show validation error)
+1. Add a new entry without eating out (should maintain streak)
+2. Add a new entry with eating out <500 calories (should maintain streak)
+3. Add a new entry with eating out ≥500 calories (should show warning but allow entry, breaks streak)
 4. Edit existing entries to change eating out status
-5. Verify streak calculation works correctly with new rule
+5. Verify streak calculation correctly resets when rule is violated
+6. Verify visual feedback shows red for ≥500 calories, green for <500 calories
