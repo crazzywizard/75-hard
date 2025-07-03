@@ -89,7 +89,8 @@ export default function Home() {
 
   const addTodayEntry = async (entry: {
     noSugar: boolean;
-    noEatingOut: boolean;
+    ateOut: boolean;
+    eatingOutCalories: number;
     caloriesBurned: number;
     steps: number;
     notes: string;
@@ -104,7 +105,9 @@ export default function Home() {
     const newEntry = {
       date: todayStr,
       no_sugar: entry.noSugar,
-      no_eating_out: entry.noEatingOut,
+      no_eating_out: !entry.ateOut, // Keep for backward compatibility
+      ate_out: entry.ateOut,
+      eating_out_calories: entry.eatingOutCalories,
       calories_burned: entry.caloriesBurned,
       steps: entry.steps,
       notes: entry.notes,
@@ -229,9 +232,12 @@ export default function Home() {
     );
 
     for (const entry of sortedEntries) {
+      // Check eating out rule: either didn't eat out OR ate out with <500 calories
+      const eatingOutRuleSatisfied = !entry.ate_out || (entry.ate_out && entry.eating_out_calories < 500);
+      
       if (
         entry.no_sugar &&
-        entry.no_eating_out &&
+        eatingOutRuleSatisfied &&
         (entry.calories_burned >= 350 || entry.steps >= 8000)
       ) {
         streak++;

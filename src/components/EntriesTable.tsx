@@ -5,6 +5,8 @@ export interface DayEntry {
   date: string;
   no_sugar: boolean;
   no_eating_out: boolean;
+  ate_out: boolean;
+  eating_out_calories: number;
   calories_burned: number;
   steps: number;
   notes?: string;
@@ -32,7 +34,14 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
 
   const startEdit = (entry: DayEntry) => {
     setEditingDate(entry.date);
-    setEditValues({ ...entry });
+    setEditValues({
+      no_sugar: entry.no_sugar,
+      ate_out: entry.ate_out,
+      eating_out_calories: entry.eating_out_calories,
+      calories_burned: entry.calories_burned,
+      steps: entry.steps,
+      notes: entry.notes
+    });
   };
 
   const cancelEdit = () => {
@@ -40,25 +49,34 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
     setEditValues({});
   };
 
-  const handleFieldChange = (
-    field: keyof Omit<DayEntry, 'id' | 'date'>,
-    value: string | number | boolean
-  ) => {
-    setEditValues((prev) => ({ ...prev, [field]: value }));
+  const handleFieldChange = (field: keyof DayEntry, value: string | number | boolean) => {
+    setEditValues((prev: Partial<DayEntry>) => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
-  const saveEdit = async (date: string) => {
-    if (!editValues) return;
-    // Only update fields that have changed
-    const original = entries.find((e) => e.date === date);
-    if (!original) return;
-    for (const key of Object.keys(editValues) as (keyof Omit<DayEntry, 'id' | 'date'>)[]) {
-      if (editValues[key] !== undefined && editValues[key] !== original[key]) {
-        await updateEntry(date, key, editValues[key]!);
+  const saveEdit = (date: string) => {
+    Object.entries(editValues).forEach(([field, value]) => {
+      if (value !== undefined) {
+        updateEntry(date, field as keyof Omit<DayEntry, 'id' | 'date'>, value);
       }
-    }
+    });
     setEditingDate(null);
     setEditValues({});
+  };
+
+  const getEatingOutStatus = (entry: DayEntry, isEditing: boolean) => {
+    const ateOut = isEditing ? !!editValues.ate_out : entry.ate_out;
+    const calories = isEditing ? (editValues.eating_out_calories ?? 0) : entry.eating_out_calories;
+    
+    if (!ateOut) {
+      return { text: 'No', color: 'text-green-600 dark:text-green-400', satisfied: true };
+    } else if (calories < 500) {
+      return { text: `Yes (${calories} cal)`, color: 'text-green-600 dark:text-green-400', satisfied: true };
+    } else {
+      return { text: `Yes (${calories} cal)`, color: 'text-red-600 dark:text-red-400', satisfied: false };
+    }
   };
 
   return (
@@ -68,6 +86,8 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
         {entries.map((entry) => {
           const isEditing = editingDate === entry.date;
           const isToday = entry.date === todayStr;
+          const eatingOutStatus = getEatingOutStatus(entry, isEditing);
+          
           return (
             <div key={entry.date} className="border-b border-gray-200 dark:border-gray-700 p-4">
               <div className="mb-2">
@@ -86,18 +106,49 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                   className="w-4 h-4 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500 dark:focus:ring-red-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mt-1"
                 />
               </div>
+              
+              {/* Enhanced Eating Out Section */}
               <div className="mb-2">
                 <span className="font-semibold text-gray-900 dark:text-gray-100 block">
-                  No Eating / Eating Out &lt;500 Cal:
+                  Eating Out:
                 </span>
-                <input
-                  type="checkbox"
-                  checked={isEditing ? !!editValues.no_eating_out : entry.no_eating_out}
-                  disabled={!isEditing}
-                  onChange={(e) => handleFieldChange('no_eating_out', e.target.checked)}
-                  className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 mt-1"
-                />
+                {isEditing ? (
+                  <div className="space-y-2 mt-1">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={!!editValues.ate_out}
+                        onChange={(e) => {
+                          handleFieldChange('ate_out', e.target.checked);
+                          if (!e.target.checked) {
+                            handleFieldChange('eating_out_calories', 0);
+                          }
+                        }}
+                        className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      />
+                      <span className="text-sm">Ate Out</span>
+                    </label>
+                    {editValues.ate_out && (
+                      <div className="flex items-center gap-2">
+                        <label className="text-xs text-gray-600 dark:text-gray-400">Calories:</label>
+                        <input
+                          type="number"
+                          value={editValues.eating_out_calories ?? ''}
+                          onChange={(e) => handleFieldChange('eating_out_calories', parseInt(e.target.value) || 0)}
+                          className="w-20 p-1 text-center border border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
+                          min="0"
+                          max="2000"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <span className={`${eatingOutStatus.color} block mt-1`}>
+                    {eatingOutStatus.text}
+                  </span>
+                )}
               </div>
+              
               <div className="mb-2">
                 <span className="font-semibold text-gray-900 dark:text-gray-100 block">
                   Calories Burned:
@@ -126,13 +177,12 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
               </div>
               <div className="mb-2">
                 <span className="font-semibold text-gray-900 dark:text-gray-100 block">Notes:</span>
-                <input
-                  type="text"
-                  value={isEditing ? editValues.notes ?? '' : entry.notes || ''}
+                <textarea
+                  value={isEditing ? editValues.notes ?? '' : entry.notes ?? ''}
                   disabled={!isEditing}
                   onChange={(e) => handleFieldChange('notes', e.target.value)}
-                  className="w-full mt-1 p-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
-                  placeholder="Add notes..."
+                  className="w-full p-1 text-left border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600 mt-1"
+                  rows={2}
                 />
               </div>
               <div className="flex gap-2">
@@ -186,7 +236,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                 No Sugar
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                No Eating / Eating Out &lt;500 Cal
+                Eating Out Status
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Calories Burned
@@ -206,6 +256,8 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
             {entries.map((entry) => {
               const isEditing = editingDate === entry.date;
               const isToday = entry.date === todayStr;
+              const eatingOutStatus = getEatingOutStatus(entry, isEditing);
+              
               return (
                 <tr key={entry.date} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                   <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 font-medium">
@@ -221,13 +273,39 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                     />
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <input
-                      type="checkbox"
-                      checked={isEditing ? !!editValues.no_eating_out : entry.no_eating_out}
-                      disabled={!isEditing}
-                      onChange={(e) => handleFieldChange('no_eating_out', e.target.checked)}
-                      className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    />
+                    {isEditing ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <label className="flex items-center gap-1 text-xs">
+                          <input
+                            type="checkbox"
+                            checked={!!editValues.ate_out}
+                            onChange={(e) => {
+                              handleFieldChange('ate_out', e.target.checked);
+                              if (!e.target.checked) {
+                                handleFieldChange('eating_out_calories', 0);
+                              }
+                            }}
+                            className="w-3 h-3 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-1 dark:bg-gray-700 dark:border-gray-600"
+                          />
+                          Ate Out
+                        </label>
+                        {editValues.ate_out && (
+                          <input
+                            type="number"
+                            value={editValues.eating_out_calories ?? ''}
+                            onChange={(e) => handleFieldChange('eating_out_calories', parseInt(e.target.value) || 0)}
+                            className="w-16 p-1 text-xs text-center border border-gray-300 rounded-md focus:ring-1 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
+                            min="0"
+                            max="2000"
+                            placeholder="cal"
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <span className={`text-sm ${eatingOutStatus.color}`}>
+                        {eatingOutStatus.text}
+                      </span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <input
@@ -251,48 +329,47 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                       min="0"
                     />
                   </td>
-                  <td className="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                    <input
-                      type="text"
-                      value={isEditing ? editValues.notes ?? '' : entry.notes || ''}
+                  <td className="px-4 py-3">
+                    <textarea
+                      value={isEditing ? editValues.notes ?? '' : entry.notes ?? ''}
                       disabled={!isEditing}
                       onChange={(e) => handleFieldChange('notes', e.target.value)}
-                      className="w-full p-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
-                      placeholder="Add notes..."
+                      className="w-full p-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600 resize-none"
+                      rows={1}
                     />
                   </td>
                   <td className="px-4 py-3 text-center">
                     {isToday ? (
                       isEditing ? (
-                        <>
+                        <div className="flex flex-col gap-1">
                           <button
                             onClick={() => saveEdit(entry.date)}
-                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 border shadow-sm rounded px-3 py-1 mr-2"
+                            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 text-xs border shadow-sm rounded px-2 py-1"
                           >
                             Save
                           </button>
                           <button
                             onClick={cancelEdit}
-                            className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 border shadow-sm rounded px-3 py-1"
+                            className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 text-xs border shadow-sm rounded px-2 py-1"
                           >
                             Cancel
                           </button>
-                        </>
+                        </div>
                       ) : (
-                        <>
+                        <div className="flex flex-col gap-1">
                           <button
                             onClick={() => startEdit(entry)}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 border shadow-sm rounded px-3 py-1 mr-2"
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-xs border shadow-sm rounded px-2 py-1"
                           >
                             Update
                           </button>
                           <button
                             onClick={() => deleteEntry(entry.date)}
-                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 border shadow-sm rounded px-3 py-1"
+                            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-xs border shadow-sm rounded px-2 py-1"
                           >
                             Delete
                           </button>
-                        </>
+                        </div>
                       )
                     ) : null}
                   </td>
