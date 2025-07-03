@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse, NextRequest } from 'next/server';
+import { DayEntry } from '@/components/EntriesTable';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -18,7 +19,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  return NextResponse.json(data);
+  // Transform data to ensure new fields have defaults if missing
+  const transformedData = data?.map((entry: DayEntry) => ({
+    ...entry,
+    ate_out: entry.ate_out ?? false,
+    eating_out_calories: entry.eating_out_calories ?? 0
+  }));
+
+  return NextResponse.json(transformedData);
 }
 
 export async function POST(request: Request) {
@@ -28,7 +36,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Participant ID is required in the body' }, { status: 400 });
   }
 
-  const { data, error } = await supabase.from('entries').insert([body]).select();
+  // Ensure new fields have defaults
+  const entryData = {
+    ...body,
+    ate_out: body.ate_out ?? false,
+    eating_out_calories: body.eating_out_calories ?? 0
+  };
+
+  const { data, error } = await supabase.from('entries').insert([entryData]).select();
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
