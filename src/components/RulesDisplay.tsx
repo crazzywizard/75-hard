@@ -8,7 +8,7 @@ const RulesDisplay = () => (
     </div>
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border-l-4 border-orange-500">
       <h3 className="font-semibold text-orange-600 dark:text-orange-400 mb-2">Rule 2</h3>
-      <p className="text-sm text-gray-700 dark:text-gray-300">NO EATING OUT</p>
+      <p className="text-sm text-gray-700 dark:text-gray-300">NO EATING OR IF EATING OUT &lt; 500 CALORIES</p>
     </div>
     <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-md border-l-4 border-green-500">
       <h3 className="font-semibold text-green-600 dark:text-green-400 mb-2">Rule 3</h3>

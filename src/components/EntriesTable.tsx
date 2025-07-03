@@ -88,7 +88,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
               </div>
               <div className="mb-2">
                 <span className="font-semibold text-gray-900 dark:text-gray-100 block">
-                  No Eating Out:
+                  No Eating / Eating Out &lt;500 Cal:
                 </span>
                 <input
                   type="checkbox"
@@ -186,7 +186,7 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                 No Sugar
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                No Eating Out
+                No Eating / Eating Out &lt;500 Cal
               </th>
               <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Calories Burned
