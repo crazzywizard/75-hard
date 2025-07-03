@@ -50,14 +50,14 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
             />
             No Sugar
           </label>
-          <label className="flex items-center gap-3 w-full sm:w-auto sm:flex-1 min-w-[140px] text-sm font-medium text-gray-700 dark:text-gray-300 px-2 py-2">
+          <label className="flex items-center gap-3 w-full sm:w-auto sm:flex-1 min-w-[180px] text-sm font-medium text-gray-700 dark:text-gray-300 px-2 py-2">
             <input
               type="checkbox"
               checked={noEatingOut}
               onChange={(e) => setNoEatingOut(e.target.checked)}
               className="w-6 h-6 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500 dark:focus:ring-orange-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             />
-            No Eating Out
+            No Eating / Eating Out &lt;500 Cal
           </label>
           <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-1 min-w-[160px] px-2 py-2">
             <label
