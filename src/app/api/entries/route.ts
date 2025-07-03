@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { NextResponse, NextRequest } from 'next/server';
+import { DayEntry } from '@/components/EntriesTable';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Transform data to ensure new fields have defaults if missing
-  const transformedData = data?.map((entry: any) => ({
+  const transformedData = data?.map((entry: DayEntry) => ({
     ...entry,
     ate_out: entry.ate_out ?? false,
     eating_out_calories: entry.eating_out_calories ?? 0
