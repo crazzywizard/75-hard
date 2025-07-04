@@ -144,8 +144,7 @@ export default function Home() {
 
   const updateEntry = async (
     date: string,
-    field: keyof Omit<DayEntry, 'id' | 'date'>,
-    value: string | number | boolean
+    updates: Partial<Omit<DayEntry, 'id' | 'date'>>
   ) => {
     if (!currentParticipant) return;
 
@@ -153,7 +152,7 @@ export default function Home() {
 
     try {
       const updatedEntries = entries.map((entry) =>
-        entry.date === date ? { ...entry, [field]: value } : entry
+        entry.date === date ? { ...entry, ...updates } : entry
       );
       setEntries(updatedEntries);
 
@@ -162,7 +161,7 @@ export default function Home() {
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ [field]: value })
+          body: JSON.stringify(updates)
         }
       );
 

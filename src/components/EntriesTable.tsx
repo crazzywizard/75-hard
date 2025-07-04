@@ -17,8 +17,7 @@ interface EntriesTableProps {
   entries: DayEntry[];
   updateEntry: (
     date: string,
-    field: keyof Omit<DayEntry, 'id' | 'date'>,
-    value: string | number | boolean
+    updates: Partial<Omit<DayEntry, 'id' | 'date'>>
   ) => void;
   deleteEntry: (date: string) => void;
 }
@@ -57,11 +56,20 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
   };
 
   const saveEdit = (date: string) => {
+    // Filter out undefined values and make a single API call
+    const updates: Record<string, string | number | boolean> = {};
+    
     Object.entries(editValues).forEach(([field, value]) => {
-      if (value !== undefined) {
-        updateEntry(date, field as keyof Omit<DayEntry, 'id' | 'date'>, value);
+      if (value !== undefined && value !== null) {
+        updates[field] = value as string | number | boolean;
       }
     });
+    
+    // Make a single API call with all updates
+    if (Object.keys(updates).length > 0) {
+      updateEntry(date, updates);
+    }
+    
     setEditingDate(null);
     setEditValues({});
   };
