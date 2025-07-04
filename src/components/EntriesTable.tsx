@@ -237,20 +237,22 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                       </button>
                     </>
                   ) : (
-                    <button
-                      onClick={() => startEdit(entry)}
-                      className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 border shadow-sm rounded px-3 py-1"
-                    >
-                      Update
-                    </button>
+                    <>
+                      <button
+                        onClick={() => startEdit(entry)}
+                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 border shadow-sm rounded px-3 py-1"
+                      >
+                        Update
+                      </button>
+                      <button
+                        onClick={() => deleteEntry(entry.date)}
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 border shadow-sm rounded px-3 py-1"
+                      >
+                        Delete
+                      </button>
+                    </>
                   )
                 ) : null}
-                <button
-                  onClick={() => deleteEntry(entry.date)}
-                  className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 border shadow-sm rounded px-3 py-1"
-                >
-                  Delete
-                </button>
               </div>
             </div>
           );
@@ -389,20 +391,22 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                           </button>
                           </>
                         ) : (
-                          <button
-                            onClick={() => startEdit(entry)}
-                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
-                          >
-                            Update
-                          </button>
+                          <>
+                            <button
+                              onClick={() => startEdit(entry)}
+                              className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 text-sm font-medium"
+                            >
+                              Update
+                            </button>
+                            <button
+                              onClick={() => deleteEntry(entry.date)}
+                              className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
+                            >
+                              Delete
+                            </button>
+                          </>
                         )
                       )}
-                      <button
-                        onClick={() => deleteEntry(entry.date)}
-                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium"
-                      >
-                        Delete
-                      </button>
                     </div>
                   </td>
                 </tr>
