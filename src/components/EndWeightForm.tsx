@@ -10,13 +10,20 @@ const EndWeightForm: React.FC<EndWeightFormProps> = ({ onSetEndWeight, isVisible
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const weight = parseFloat(endWeight);
-    if (weight > 0) {
-      onSetEndWeight(weight);
-      setEndWeight('');
-    } else {
-      alert('Please enter a valid weight.');
+    
+    if (!endWeight.trim()) {
+      alert('Please enter a weight.');
+      return;
     }
+    
+    const weight = parseFloat(endWeight.trim());
+    if (isNaN(weight) || weight <= 0) {
+      alert('Please enter a valid weight greater than 0.');
+      return;
+    }
+    
+    onSetEndWeight(weight);
+    setEndWeight('');
   };
 
   if (!isVisible) return null;

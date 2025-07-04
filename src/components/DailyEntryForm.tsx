@@ -19,18 +19,26 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
   const [steps, setSteps] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Helper function to convert string to number for validation
+  const convertToNumber = (value: string): number => {
+    if (value.trim() === '') return 0;
+    const num = parseInt(value);
+    return isNaN(num) ? 0 : num;
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     onAddEntry({
       noSugar,
       ateOut,
-      eatingOutCalories: ateOut ? Number(eatingOutCalories) || 0 : 0,
-      caloriesBurned: caloriesBurned === '' ? 0 : Number(caloriesBurned),
-      steps: steps === '' ? 0 : Number(steps),
+      eatingOutCalories: ateOut ? convertToNumber(eatingOutCalories) : 0,
+      caloriesBurned: convertToNumber(caloriesBurned),
+      steps: convertToNumber(steps),
       notes
     });
-    // Reset fields after submission if needed
+    
+    // Reset fields after submission
     setNoSugar(false);
     setAteOut(false);
     setEatingOutCalories('');
@@ -39,7 +47,7 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
     setNotes('');
   };
 
-  const isEatingOutRuleSatisfied = !ateOut || (ateOut && Number(eatingOutCalories) < 500);
+  const isEatingOutRuleSatisfied = !ateOut || (ateOut && (convertToNumber(eatingOutCalories) < 500));
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-6">
@@ -87,18 +95,18 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
                   id="eatingOutCalories"
                   value={eatingOutCalories}
                   onChange={(e) => setEatingOutCalories(e.target.value)}
-                                     className={`w-20 p-1 text-center border rounded-md focus:ring-2 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600 ${
-                     isEatingOutRuleSatisfied 
-                       ? 'border-gray-300 focus:ring-green-500' 
-                       : 'border-red-500 focus:ring-red-500'
-                   }`}
-                   min="0"
-                   placeholder="0"
-                   required
+                  className={`w-20 p-1 text-center border rounded-md focus:ring-2 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600 ${
+                    isEatingOutRuleSatisfied 
+                      ? 'border-gray-300 focus:ring-green-500' 
+                      : 'border-red-500 focus:ring-red-500'
+                  }`}
+                  min="0"
+                  placeholder="0"
+                  required
                 />
-                                 <span className="text-xs text-gray-500 dark:text-gray-400">
-                   (rule: &lt;500 cal)
-                 </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  (rule: &lt;500 cal)
+                </span>
               </div>
             )}
             {ateOut && !isEatingOutRuleSatisfied && (
@@ -122,6 +130,7 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
               onChange={(e) => setCaloriesBurned(e.target.value)}
               className="w-full sm:w-20 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
               min="0"
+              placeholder="0"
             />
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto sm:flex-1 min-w-[120px] px-2 py-2">
@@ -138,6 +147,7 @@ const DailyEntryForm: React.FC<DailyEntryFormProps> = ({ onAddEntry }) => {
               onChange={(e) => setSteps(e.target.value)}
               className="w-full sm:w-20 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 dark:border-gray-600"
               min="0"
+              placeholder="0"
             />
           </div>
         </div>
