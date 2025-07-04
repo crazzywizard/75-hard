@@ -24,7 +24,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
       return;
     }
 
-    const weight = parseFloat(startWeight);
+    const weight = parseFloat(startWeight.trim());
     if (isNaN(weight) || weight <= 0) {
       setError('Please enter a valid starting weight greater than 0.');
       return;
@@ -44,7 +44,7 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: userId,
+          user_id: userId.trim(),
           start_date: localDate,
           start_weight: weight
         })

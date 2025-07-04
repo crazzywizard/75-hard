@@ -32,12 +32,15 @@ const SetupChallenge: React.FC<SetupChallengeProps> = ({
     setWeightInput(value); // Always update the displayed value
 
     // Update parent state with parsed value
-    if (value === '') {
+    if (value.trim() === '') {
       setCurrentWeight(0);
     } else {
       const weight = parseFloat(value);
-      if (!isNaN(weight)) {
+      if (!isNaN(weight) && weight > 0) {
         setCurrentWeight(weight);
+      } else if (value.trim() !== '') {
+        // If there's input but it's not a valid positive number, set to 0
+        setCurrentWeight(0);
       }
     }
   };
