@@ -225,25 +225,53 @@ export default function Home() {
   };
 
   const getCurrentStreak = (entries: DayEntry[]): number => {
-    let streak = 0;
+    if (entries.length === 0) return 0;
+
+    // Sort entries by date (newest first)
     const sortedEntries = [...entries].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 
-    for (const entry of sortedEntries) {
-      // Check eating out rule: either didn't eat out OR ate out with <500 calories
-      const eatingOutRuleSatisfied = !entry.ate_out || (entry.ate_out && entry.eating_out_calories < 500);
+    // Create a map for quick lookup of entries by date
+    const entriesByDate = new Map<string, DayEntry>();
+    sortedEntries.forEach(entry => {
+      entriesByDate.set(entry.date, entry);
+    });
+
+    let streak = 0;
+    let currentDate = new Date(sortedEntries[0].date); // Start from the most recent entry date
+
+    while (true) {
+      // Format current date as YYYY-MM-DD
+      const dateStr = currentDate.toISOString().split('T')[0];
       
-      if (
-        entry.no_sugar &&
-        eatingOutRuleSatisfied &&
-        (entry.calories_burned >= 350 || entry.steps >= 8000)
-      ) {
+      // Check if we have an entry for this date
+      const entry = entriesByDate.get(dateStr);
+      
+      if (!entry) {
+        // No entry for this date, streak is broken
+        break;
+      }
+
+      // Check if this entry meets all the rules
+      // Rule 1: No sugar
+      // Rule 2: No eating out OR eating out with <500 calories  
+      // Rule 3 OR Rule 4: 350+ calories burned OR 8000+ steps
+      const rule1Satisfied = entry.no_sugar;
+      const rule2Satisfied = !entry.ate_out || (entry.ate_out && entry.eating_out_calories < 500);
+      const rule3Satisfied = entry.calories_burned >= 350;
+      const rule4Satisfied = entry.steps >= 8000;
+      
+      if (rule1Satisfied && rule2Satisfied && (rule3Satisfied || rule4Satisfied)) {
         streak++;
+        // Move to the previous day by creating a new Date object
+        currentDate = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
       } else {
+        // This entry doesn't meet the rules, streak is broken
         break;
       }
     }
+
     return streak;
   };
 
