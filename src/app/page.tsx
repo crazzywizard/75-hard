@@ -264,8 +264,8 @@ export default function Home() {
       
       if (rule1Satisfied && rule2Satisfied && (rule3Satisfied || rule4Satisfied)) {
         streak++;
-        // Move to the previous day
-        currentDate.setDate(currentDate.getDate() - 1);
+        // Move to the previous day by creating a new Date object
+        currentDate = new Date(currentDate.getTime() - 24 * 60 * 60 * 1000);
       } else {
         // This entry doesn't meet the rules, streak is broken
         break;
