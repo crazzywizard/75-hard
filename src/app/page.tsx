@@ -12,6 +12,7 @@ import ParticipantSelector, { Participant } from '../components/ParticipantSelec
 import { ThemeSwitcher } from '../components/ThemeSwitcher';
 import AddParticipantForm from '../components/AddParticipantForm';
 import EndWeightForm from '../components/EndWeightForm';
+import StepsLeaderboard from '../components/StepsLeaderboard';
 
 export default function Home() {
   const [entries, setEntries] = useState<DayEntry[]>([]);
@@ -330,6 +331,10 @@ export default function Home() {
                 endWeight={currentParticipant.end_weight}
                 totalDays={entries.length}
                 daysPassed={getDaysPassed()}
+              />
+              <StepsLeaderboard
+                entries={entries}
+                participants={participants}
               />
             </div>
 
