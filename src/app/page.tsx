@@ -20,6 +20,8 @@ export default function Home() {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [currentParticipant, setCurrentParticipant] = useState<Participant | null>(null);
   const [currentParticipantId, setCurrentParticipantId] = useState<string | null>(null);
+  const [allEntries, setAllEntries] = useState<DayEntry[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
 
   const fetchParticipants = useCallback(async () => {
     try {
@@ -38,10 +40,36 @@ export default function Home() {
     }
   }, [currentParticipantId]);
 
+  // Fetch all entries for leaderboard
+  const fetchAllEntries = useCallback(async () => {
+    setLoadingLeaderboard(true);
+    try {
+      const response = await fetch('/api/entries');
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setAllEntries(data);
+      } else {
+        setAllEntries([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch all entries:', error);
+      setAllEntries([]);
+    } finally {
+      setLoadingLeaderboard(false);
+    }
+  }, []);
+
   // Fetch participants on initial load
   useEffect(() => {
     fetchParticipants();
   }, [fetchParticipants]);
+
+  // Fetch all entries when no participant is selected
+  useEffect(() => {
+    if (!currentParticipant && participants.length > 0) {
+      fetchAllEntries();
+    }
+  }, [currentParticipant, participants.length, fetchAllEntries]);
 
   // Load data from Supabase when participant changes
   useEffect(() => {
@@ -314,13 +342,31 @@ export default function Home() {
         />
 
         {loading || !currentParticipant ? (
-          <div className="text-center py-10">
-            <p className="text-xl text-gray-700 dark:text-gray-300">
-              {currentParticipant
-                ? `Loading ${currentParticipant.user_id}'s challenge...`
-                : 'Select a participant to begin.'}
-            </p>
-          </div>
+          <>
+            <div className="text-center py-10">
+              <p className="text-xl text-gray-700 dark:text-gray-300">
+                {currentParticipant
+                  ? `Loading ${currentParticipant.user_id}'s challenge...`
+                  : 'Select a participant to begin.'}
+              </p>
+            </div>
+            {!loading && !currentParticipant && participants.length > 0 && (
+              loadingLeaderboard ? (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Loading leaderboard...
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <StepsLeaderboard
+                  entries={allEntries}
+                  participants={participants}
+                />
+              )
+            )}
+          </>
         ) : (
           <>
             <div className="text-center mb-8">
@@ -331,10 +377,6 @@ export default function Home() {
                 endWeight={currentParticipant.end_weight}
                 totalDays={entries.length}
                 daysPassed={getDaysPassed()}
-              />
-              <StepsLeaderboard
-                entries={entries}
-                participants={participants}
               />
             </div>
 
