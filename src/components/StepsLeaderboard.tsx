@@ -133,7 +133,7 @@ const StepsLeaderboard: React.FC<StepsLeaderboardProps> = ({ entries, participan
         </div>
       ) : (
         <div className="space-y-3">
-          {leaderboardData.map((entry, index) => (
+          {leaderboardData.map((entry) => (
             <div
               key={entry.participant.id}
               className={`flex items-center justify-between p-4 rounded-lg transition-all duration-200 ${
