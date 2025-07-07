@@ -1,19 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DayEntry } from './EntriesTable';
 import { Participant } from './ParticipantSelector';
 
-interface StepsLeaderboardProps {
+interface LeaderboardProps {
   entries: DayEntry[];
   participants: Participant[];
 }
 
 interface LeaderboardEntry {
   participant: Participant;
-  weeklySteps: number;
+  weeklyTotal: number;
   rank: number;
 }
 
-const StepsLeaderboard: React.FC<StepsLeaderboardProps> = ({ entries, participants }) => {
+type MetricType = 'steps' | 'calories';
+
+const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
+  const [selectedMetric, setSelectedMetric] = useState<MetricType>('steps');
+
   // Get the current week's date range (Monday to Sunday)
   const getCurrentWeekRange = () => {
     const now = new Date();
@@ -32,7 +36,7 @@ const StepsLeaderboard: React.FC<StepsLeaderboardProps> = ({ entries, participan
   };
 
   // Filter entries for current week and calculate totals
-  const calculateWeeklySteps = (): LeaderboardEntry[] => {
+  const calculateWeeklyTotals = (): LeaderboardEntry[] => {
     const { monday, sunday } = getCurrentWeekRange();
     
     // Filter entries for current week
@@ -41,34 +45,35 @@ const StepsLeaderboard: React.FC<StepsLeaderboardProps> = ({ entries, participan
       return entryDate >= monday && entryDate <= sunday;
     });
 
-    // Group by participant and sum steps
-    const participantSteps = new Map<string, number>();
+    // Group by participant and sum the selected metric
+    const participantTotals = new Map<string, number>();
     
     weeklyEntries.forEach(entry => {
       const participantId = String(entry.participant_id);
-      const currentSteps = participantSteps.get(participantId) || 0;
-      participantSteps.set(participantId, currentSteps + entry.steps);
+      const currentTotal = participantTotals.get(participantId) || 0;
+      const valueToAdd = selectedMetric === 'steps' ? entry.steps : entry.calories_burned;
+      participantTotals.set(participantId, currentTotal + valueToAdd);
     });
 
     // Create leaderboard entries
     const leaderboardEntries: LeaderboardEntry[] = [];
     
     participants.forEach(participant => {
-      const weeklySteps = participantSteps.get(String(participant.id)) || 0;
+      const weeklyTotal = participantTotals.get(String(participant.id)) || 0;
       leaderboardEntries.push({
         participant,
-        weeklySteps,
+        weeklyTotal,
         rank: 0 // Will be set after sorting
       });
     });
 
-    // Sort by steps (descending) and assign ranks
-    leaderboardEntries.sort((a, b) => b.weeklySteps - a.weeklySteps);
+    // Sort by total (descending) and assign ranks
+    leaderboardEntries.sort((a, b) => b.weeklyTotal - a.weeklyTotal);
     
     // Assign ranks (handle ties)
     let currentRank = 1;
     leaderboardEntries.forEach((entry, index) => {
-      if (index > 0 && entry.weeklySteps < leaderboardEntries[index - 1].weeklySteps) {
+      if (index > 0 && entry.weeklyTotal < leaderboardEntries[index - 1].weeklyTotal) {
         currentRank = index + 1;
       }
       entry.rank = currentRank;
@@ -100,11 +105,31 @@ const StepsLeaderboard: React.FC<StepsLeaderboardProps> = ({ entries, participan
     if (rank === 1) return "🥇";
     if (rank === 2) return "🥈";
     if (rank === 3) return "🥉";
-    return "🏃";
+    return selectedMetric === 'steps' ? "🏃" : "🔥";
   };
 
-  const leaderboardData = calculateWeeklySteps();
+  // Get metric-specific styling and labels
+  const getMetricInfo = () => {
+    if (selectedMetric === 'steps') {
+      return {
+        title: '🏆 Steps Leaderboard',
+        color: 'sky',
+        colorClass: 'text-sky-600 dark:text-sky-400',
+        unit: 'steps'
+      };
+    } else {
+      return {
+        title: '🏆 Calories Leaderboard',
+        color: 'orange',
+        colorClass: 'text-orange-600 dark:text-orange-400',
+        unit: 'calories'
+      };
+    }
+  };
+
+  const leaderboardData = calculateWeeklyTotals();
   const { monday, sunday } = getCurrentWeekRange();
+  const metricInfo = getMetricInfo();
 
   // Format date range for display
   const formatDateRange = () => {
@@ -118,10 +143,36 @@ const StepsLeaderboard: React.FC<StepsLeaderboardProps> = ({ entries, participan
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-          🏆 Steps Leaderboard
+          {metricInfo.title}
         </h2>
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Week of {formatDateRange()}
+        </div>
+      </div>
+
+      {/* Toggle buttons */}
+      <div className="flex justify-center mb-6">
+        <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+          <button
+            onClick={() => setSelectedMetric('steps')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              selectedMetric === 'steps'
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+            }`}
+          >
+            🏃 Steps
+          </button>
+          <button
+            onClick={() => setSelectedMetric('calories')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              selectedMetric === 'calories'
+                ? 'bg-orange-600 text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+            }`}
+          >
+            🔥 Calories
+          </button>
         </div>
       </div>
 
@@ -158,11 +209,11 @@ const StepsLeaderboard: React.FC<StepsLeaderboardProps> = ({ entries, participan
 
               <div className="flex items-center space-x-3">
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-sky-600 dark:text-sky-400">
-                    {formatNumber(entry.weeklySteps)}
+                  <div className={`text-2xl font-bold ${metricInfo.colorClass}`}>
+                    {formatNumber(entry.weeklyTotal)}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
-                    steps
+                    {metricInfo.unit}
                   </div>
                 </div>
                 <div className="text-2xl">
@@ -177,25 +228,25 @@ const StepsLeaderboard: React.FC<StepsLeaderboardProps> = ({ entries, participan
       {leaderboardData.length > 0 && (
         <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                {formatNumber(leaderboardData.reduce((sum, entry) => sum + entry.weeklySteps, 0))}
+            <div className={`${selectedMetric === 'steps' ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-orange-50 dark:bg-orange-900/20'} p-3 rounded-lg`}>
+              <div className={`text-2xl font-bold ${selectedMetric === 'steps' ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                {formatNumber(leaderboardData.reduce((sum, entry) => sum + entry.weeklyTotal, 0))}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                Total Steps This Week
+                Total {selectedMetric === 'steps' ? 'Steps' : 'Calories'} This Week
               </div>
             </div>
             <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
               <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {leaderboardData.length > 0 ? formatNumber(Math.round(leaderboardData.reduce((sum, entry) => sum + entry.weeklySteps, 0) / leaderboardData.length)) : 0}
+                {leaderboardData.length > 0 ? formatNumber(Math.round(leaderboardData.reduce((sum, entry) => sum + entry.weeklyTotal, 0) / leaderboardData.length)) : 0}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                Average Steps
+                Average {selectedMetric === 'steps' ? 'Steps' : 'Calories'}
               </div>
             </div>
             <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
               <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {leaderboardData.length > 0 ? formatNumber(Math.max(...leaderboardData.map(entry => entry.weeklySteps))) : 0}
+                {leaderboardData.length > 0 ? formatNumber(Math.max(...leaderboardData.map(entry => entry.weeklyTotal))) : 0}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">
                 Highest This Week
@@ -208,4 +259,4 @@ const StepsLeaderboard: React.FC<StepsLeaderboardProps> = ({ entries, participan
   );
 };
 
-export default StepsLeaderboard;
+export default Leaderboard;

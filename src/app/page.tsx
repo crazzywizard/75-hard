@@ -12,7 +12,7 @@ import ParticipantSelector, { Participant } from '../components/ParticipantSelec
 import { ThemeSwitcher } from '../components/ThemeSwitcher';
 import AddParticipantForm from '../components/AddParticipantForm';
 import EndWeightForm from '../components/EndWeightForm';
-import StepsLeaderboard from '../components/StepsLeaderboard';
+import Leaderboard from '../components/Leaderboard';
 
 export default function Home() {
   const [entries, setEntries] = useState<DayEntry[]>([]);
@@ -368,7 +368,7 @@ export default function Home() {
                   </div>
                 </div>
               ) : (
-                <StepsLeaderboard
+                <Leaderboard
                   entries={allEntries}
                   participants={participants}
                 />
