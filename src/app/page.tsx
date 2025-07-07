@@ -12,13 +12,16 @@ import ParticipantSelector, { Participant } from '../components/ParticipantSelec
 import { ThemeSwitcher } from '../components/ThemeSwitcher';
 import AddParticipantForm from '../components/AddParticipantForm';
 import EndWeightForm from '../components/EndWeightForm';
+import StepsLeaderboard from '../components/StepsLeaderboard';
 
 export default function Home() {
   const [entries, setEntries] = useState<DayEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [currentParticipant, setCurrentParticipant] = useState<Participant | null>(null);
-  const [currentParticipantId, setCurrentParticipantId] = useState<string | null>(null);
+  const [allEntries, setAllEntries] = useState<DayEntry[]>([]);
+  const [loadingLeaderboard, setLoadingLeaderboard] = useState(false);
+  const [loadingParticipantData, setLoadingParticipantData] = useState(false);
 
   const fetchParticipants = useCallback(async () => {
     try {
@@ -27,26 +30,54 @@ export default function Home() {
       if (Array.isArray(data)) {
         const sorted = data.sort((a, b) => a.user_id.localeCompare(b.user_id));
         setParticipants(sorted);
-        // If there's no current participant and we fetched some, default to the first in sorted list
-        if (!currentParticipantId && sorted.length > 0) {
-          setCurrentParticipantId(sorted[0].id);
-        }
+        // Don't auto-select any participant to allow leaderboard to show
       }
     } catch (error) {
       console.error('Failed to fetch participants:', error);
     }
-  }, [currentParticipantId]);
+  }, []);
+
+  // Fetch all entries for leaderboard
+  const fetchAllEntries = useCallback(async () => {
+    setLoadingLeaderboard(true);
+    try {
+      const response = await fetch('/api/entries');
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setAllEntries(data);
+      } else {
+        setAllEntries([]);
+      }
+    } catch (error) {
+      console.error('Failed to fetch all entries:', error);
+      setAllEntries([]);
+    } finally {
+      setLoadingLeaderboard(false);
+    }
+  }, []);
 
   // Fetch participants on initial load
   useEffect(() => {
-    fetchParticipants();
+    const loadInitialData = async () => {
+      setLoading(true);
+      await fetchParticipants();
+      setLoading(false);
+    };
+    loadInitialData();
   }, [fetchParticipants]);
+
+  // Fetch all entries when no participant is selected
+  useEffect(() => {
+    if (!currentParticipant && participants.length > 0) {
+      fetchAllEntries();
+    }
+  }, [currentParticipant, participants.length, fetchAllEntries]);
 
   // Load data from Supabase when participant changes
   useEffect(() => {
     const fetchEntries = async () => {
       if (!currentParticipant) return;
-      setLoading(true);
+      setLoadingParticipantData(true);
       try {
         const response = await fetch(`/api/entries?participant_id=${currentParticipant.id}`);
         const data = await response.json();
@@ -59,7 +90,7 @@ export default function Home() {
         console.error('Failed to fetch entries:', error);
         setEntries([]);
       }
-      setLoading(false);
+      setLoadingParticipantData(false);
     };
 
     fetchEntries();
@@ -312,12 +343,42 @@ export default function Home() {
           setCurrentParticipant={setCurrentParticipant}
         />
 
-        {loading || !currentParticipant ? (
+        {loading ? (
           <div className="text-center py-10">
             <p className="text-xl text-gray-700 dark:text-gray-300">
-              {currentParticipant
-                ? `Loading ${currentParticipant.user_id}'s challenge...`
-                : 'Select a participant to begin.'}
+              Loading participants...
+            </p>
+          </div>
+        ) : !currentParticipant ? (
+          <>
+            <div className="text-center py-10">
+              <p className="text-xl text-gray-700 dark:text-gray-300">
+                {participants.length === 0 
+                  ? 'Add a participant to get started!' 
+                  : 'Select a participant to begin.'}
+              </p>
+            </div>
+            {participants.length > 0 && (
+              loadingLeaderboard ? (
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">
+                      Loading leaderboard...
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <StepsLeaderboard
+                  entries={allEntries}
+                  participants={participants}
+                />
+              )
+            )}
+          </>
+        ) : loadingParticipantData ? (
+          <div className="text-center py-10">
+            <p className="text-xl text-gray-700 dark:text-gray-300">
+              Loading {currentParticipant.user_id}&apos;s challenge...
             </p>
           </div>
         ) : (
