@@ -9,14 +9,16 @@ interface LeaderboardProps {
 
 interface LeaderboardEntry {
   participant: Participant;
-  weeklyTotal: number;
+  total: number;
   rank: number;
 }
 
 type MetricType = 'steps' | 'calories';
+type TimePeriodType = 'week' | 'alltime';
 
 const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('steps');
+  const [selectedTimePeriod, setSelectedTimePeriod] = useState<TimePeriodType>('week');
 
   // Get the current week's date range (Monday to Sunday)
   const getCurrentWeekRange = () => {
@@ -35,20 +37,24 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
     return { monday, sunday };
   };
 
-  // Filter entries for current week and calculate totals
-  const calculateWeeklyTotals = (): LeaderboardEntry[] => {
-    const { monday, sunday } = getCurrentWeekRange();
+  // Calculate totals based on selected time period
+  const calculateTotals = (): LeaderboardEntry[] => {
+    let filteredEntries = entries;
     
-    // Filter entries for current week
-    const weeklyEntries = entries.filter(entry => {
-      const entryDate = new Date(entry.date);
-      return entryDate >= monday && entryDate <= sunday;
-    });
+    // Filter entries based on time period
+    if (selectedTimePeriod === 'week') {
+      const { monday, sunday } = getCurrentWeekRange();
+      filteredEntries = entries.filter(entry => {
+        const entryDate = new Date(entry.date);
+        return entryDate >= monday && entryDate <= sunday;
+      });
+    }
+    // For 'alltime', we use all entries without filtering
 
     // Group by participant and sum the selected metric
     const participantTotals = new Map<string, number>();
     
-    weeklyEntries.forEach(entry => {
+    filteredEntries.forEach((entry: DayEntry) => {
       const participantId = String(entry.participant_id);
       const currentTotal = participantTotals.get(participantId) || 0;
       const valueToAdd = selectedMetric === 'steps' ? entry.steps : entry.calories_burned;
@@ -58,22 +64,22 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
     // Create leaderboard entries
     const leaderboardEntries: LeaderboardEntry[] = [];
     
-    participants.forEach(participant => {
-      const weeklyTotal = participantTotals.get(String(participant.id)) || 0;
+    participants.forEach((participant: Participant) => {
+      const total = participantTotals.get(String(participant.id)) || 0;
       leaderboardEntries.push({
         participant,
-        weeklyTotal,
+        total,
         rank: 0 // Will be set after sorting
       });
     });
 
     // Sort by total (descending) and assign ranks
-    leaderboardEntries.sort((a, b) => b.weeklyTotal - a.weeklyTotal);
+    leaderboardEntries.sort((a, b) => b.total - a.total);
     
     // Assign ranks (handle ties)
     let currentRank = 1;
     leaderboardEntries.forEach((entry, index) => {
-      if (index > 0 && entry.weeklyTotal < leaderboardEntries[index - 1].weeklyTotal) {
+      if (index > 0 && entry.total < leaderboardEntries[index - 1].total) {
         currentRank = index + 1;
       }
       entry.rank = currentRank;
@@ -112,14 +118,14 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
   const getMetricInfo = () => {
     if (selectedMetric === 'steps') {
       return {
-        title: '🏆 Steps Leaderboard',
+        title: `🏆 Steps Leaderboard`,
         color: 'sky',
         colorClass: 'text-sky-600 dark:text-sky-400',
         unit: 'steps'
       };
     } else {
       return {
-        title: '🏆 Calories Leaderboard',
+        title: `🏆 Calories Leaderboard`,
         color: 'orange',
         colorClass: 'text-orange-600 dark:text-orange-400',
         unit: 'calories'
@@ -127,17 +133,34 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
     }
   };
 
-  const leaderboardData = calculateWeeklyTotals();
-  const { monday, sunday } = getCurrentWeekRange();
-  const metricInfo = getMetricInfo();
-
-  // Format date range for display
-  const formatDateRange = () => {
-    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    const mondayStr = monday.toLocaleDateString('en-US', options);
-    const sundayStr = sunday.toLocaleDateString('en-US', options);
-    return `${mondayStr} - ${sundayStr}`;
+  // Get time period info
+  const getTimePeriodInfo = () => {
+    if (selectedTimePeriod === 'week') {
+      const { monday, sunday } = getCurrentWeekRange();
+      const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+      const mondayStr = monday.toLocaleDateString('en-US', options);
+      const sundayStr = sunday.toLocaleDateString('en-US', options);
+      return {
+        label: `Week of ${mondayStr} - ${sundayStr}`,
+        totalLabel: `Total ${selectedMetric === 'steps' ? 'Steps' : 'Calories'} This Week`,
+        averageLabel: `Average ${selectedMetric === 'steps' ? 'Steps' : 'Calories'}`,
+        highestLabel: 'Highest This Week',
+        entryLabel: selectedTimePeriod === 'week' ? 'Weekly total' : 'All-time total'
+      };
+    } else {
+      return {
+        label: 'All Time',
+        totalLabel: `Total ${selectedMetric === 'steps' ? 'Steps' : 'Calories'} All Time`,
+        averageLabel: `Average ${selectedMetric === 'steps' ? 'Steps' : 'Calories'}`,
+        highestLabel: 'Highest All Time',
+        entryLabel: 'All-time total'
+      };
+    }
   };
+
+  const leaderboardData = calculateTotals();
+  const metricInfo = getMetricInfo();
+  const timePeriodInfo = getTimePeriodInfo();
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-6">
@@ -146,12 +169,37 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
           {metricInfo.title}
         </h2>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          Week of {formatDateRange()}
+          {timePeriodInfo.label}
         </div>
       </div>
 
-      {/* Toggle buttons */}
-      <div className="flex justify-center mb-6">
+      {/* Time Period and Metric Toggle buttons */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
+        {/* Time Period Selector */}
+        <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
+          <button
+            onClick={() => setSelectedTimePeriod('week')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              selectedTimePeriod === 'week'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+            }`}
+          >
+            📅 This Week
+          </button>
+          <button
+            onClick={() => setSelectedTimePeriod('alltime')}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+              selectedTimePeriod === 'alltime'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100'
+            }`}
+          >
+            🏆 All Time
+          </button>
+        </div>
+
+        {/* Metric Selector */}
         <div className="bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
           <button
             onClick={() => setSelectedMetric('steps')}
@@ -202,7 +250,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
                     {entry.participant.user_id}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Weekly total
+                    {timePeriodInfo.entryLabel}
                   </p>
                 </div>
               </div>
@@ -210,7 +258,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
               <div className="flex items-center space-x-3">
                 <div className="text-right">
                   <div className={`text-2xl font-bold ${metricInfo.colorClass}`}>
-                    {formatNumber(entry.weeklyTotal)}
+                    {formatNumber(entry.total)}
                   </div>
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     {metricInfo.unit}
@@ -230,26 +278,26 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className={`${selectedMetric === 'steps' ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-orange-50 dark:bg-orange-900/20'} p-3 rounded-lg`}>
               <div className={`text-2xl font-bold ${selectedMetric === 'steps' ? 'text-blue-600 dark:text-blue-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                {formatNumber(leaderboardData.reduce((sum, entry) => sum + entry.weeklyTotal, 0))}
+                {formatNumber(leaderboardData.reduce((sum, entry) => sum + entry.total, 0))}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                Total {selectedMetric === 'steps' ? 'Steps' : 'Calories'} This Week
+                {timePeriodInfo.totalLabel}
               </div>
             </div>
             <div className="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg">
               <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                {leaderboardData.length > 0 ? formatNumber(Math.round(leaderboardData.reduce((sum, entry) => sum + entry.weeklyTotal, 0) / leaderboardData.length)) : 0}
+                {leaderboardData.length > 0 ? formatNumber(Math.round(leaderboardData.reduce((sum, entry) => sum + entry.total, 0) / leaderboardData.length)) : 0}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                Average {selectedMetric === 'steps' ? 'Steps' : 'Calories'}
+                {timePeriodInfo.averageLabel}
               </div>
             </div>
             <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
               <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                {leaderboardData.length > 0 ? formatNumber(Math.max(...leaderboardData.map(entry => entry.weeklyTotal))) : 0}
+                {leaderboardData.length > 0 ? formatNumber(Math.max(...leaderboardData.map(entry => entry.total))) : 0}
               </div>
               <div className="text-sm text-gray-500 dark:text-gray-400">
-                Highest This Week
+                {timePeriodInfo.highestLabel}
               </div>
             </div>
           </div>
