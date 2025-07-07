@@ -6,14 +6,14 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const participantId = searchParams.get('participant_id');
 
-  if (!participantId) {
-    return NextResponse.json({ error: 'Participant ID is required' }, { status: 400 });
+  let query = supabase.from('entries').select('*');
+  
+  // If participant_id is provided, filter by it. Otherwise, return all entries
+  if (participantId) {
+    query = query.eq('participant_id', participantId);
   }
 
-  const { data, error } = await supabase
-    .from('entries')
-    .select('*')
-    .eq('participant_id', participantId);
+  const { data, error } = await query;
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
