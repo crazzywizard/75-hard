@@ -13,8 +13,11 @@ export function ThemeSwitcher() {
   }, []);
 
   const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    console.log('Theme toggle clicked, changing from:', theme, 'to:', newTheme);
+    // Ensure we only toggle between light and dark, never system
+    // If theme is undefined or system, default to light
+    const currentTheme = theme === 'dark' ? 'dark' : 'light';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    console.log('Theme toggle clicked, changing from:', currentTheme, 'to:', newTheme);
     setTheme(newTheme);
   };
 
