@@ -30,7 +30,7 @@ const ParticipantSelector: React.FC<ParticipantSelectorProps> = ({
           onClick={() => setCurrentParticipant(participant)}
           className={`py-2 px-5 rounded-full text-sm font-semibold transition-colors ${
             currentParticipant?.id === participant.id
-              ? 'bg-indigo-600 text-white shadow'
+              ? 'bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600 text-white shadow'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
           }`}
         >

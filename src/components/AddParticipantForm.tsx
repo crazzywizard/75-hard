@@ -92,13 +92,13 @@ const AddParticipantForm: React.FC<AddParticipantFormProps> = ({ onParticipantAd
         />
         <button
           type="submit"
-          className="bg-indigo-600 text-white py-2 px-6 rounded-md hover:bg-indigo-700 transition-colors disabled:bg-indigo-400"
+          className="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-700 dark:hover:bg-indigo-600 text-white py-2 px-6 rounded-md transition-colors disabled:bg-indigo-400 dark:disabled:bg-indigo-500"
           disabled={isSubmitting}
         >
           {isSubmitting ? 'Adding...' : 'Add Participant'}
         </button>
       </form>
-      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      {error && <p className="text-red-500 dark:text-red-400 text-sm mt-2">{error}</p>}
     </div>
   );
 };

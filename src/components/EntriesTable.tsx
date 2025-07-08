@@ -225,13 +225,13 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                     <>
                       <button
                         onClick={() => saveEdit(entry.date)}
-                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 border shadow-sm rounded px-3 py-1"
+                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 border border-gray-300 dark:border-gray-600 shadow-sm rounded px-3 py-1"
                       >
                         Save
                       </button>
                       <button
                         onClick={cancelEdit}
-                        className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 border shadow-sm rounded px-3 py-1"
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100 border border-gray-300 dark:border-gray-600 shadow-sm rounded px-3 py-1"
                       >
                         Cancel
                       </button>
@@ -240,13 +240,13 @@ const EntriesTable: React.FC<EntriesTableProps> = ({ entries, updateEntry, delet
                     <>
                       <button
                         onClick={() => startEdit(entry)}
-                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 border shadow-sm rounded px-3 py-1"
+                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 border border-gray-300 dark:border-gray-600 shadow-sm rounded px-3 py-1"
                       >
                         Update
                       </button>
                       <button
                         onClick={() => deleteEntry(entry.date)}
-                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 border shadow-sm rounded px-3 py-1"
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 border border-gray-300 dark:border-gray-600 shadow-sm rounded px-3 py-1"
                       >
                         Delete
                       </button>
