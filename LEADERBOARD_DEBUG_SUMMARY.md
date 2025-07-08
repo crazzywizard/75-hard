@@ -31,9 +31,9 @@ const getCurrentWeekRange = () => {
 };
 ```
 
-### 2. Added Debug Tools
-- **DebugInfo component**: Shows raw data from database to help diagnose issues
-- **Visual debug panel**: Shows today's entries, this week's entries, and participant data
+### 2. Removed Debug Tools
+- **DebugInfo component**: Removed after confirming the fix works
+- **Console logging**: Removed for production readiness
 
 ## What You Need to Do
 
@@ -48,8 +48,7 @@ SUPABASE_SERVICE_ROLE_KEY=your_actual_supabase_service_role_key
 1. Start the development server: `npm run dev`
 2. Open the app in your browser
 3. Don't select any participant (to see leaderboard)
-4. Click "Show Debug Info" to see raw data
-5. Check browser console for detailed logs
+4. Verify the leaderboard now shows correct step counts
 
 ### 3. **Verify Database Schema**
 Ensure your database has these tables with correct structure:
@@ -83,12 +82,6 @@ CREATE TABLE entries (
 );
 ```
 
-### 4. **Remove Debug Tools (Later)**
-After confirming the fix works, remove the debug tools:
-- Remove `<DebugInfo />` from `src/app/page.tsx`
-- Remove console.log statements from `src/components/Leaderboard.tsx`
-- Delete `src/components/DebugInfo.tsx`
-
 ## Expected Behavior After Fix
 
 1. **This Week View**: Should show steps/calories for the current week (Monday-Sunday)
@@ -100,11 +93,10 @@ After confirming the fix works, remove the debug tools:
 
 If the issue persists:
 
-1. **Check Console Logs**: Look for errors in browser console
-2. **Verify API Response**: Check if `/api/entries` returns data
-3. **Check Database Connection**: Ensure Supabase credentials are correct
-4. **Verify Date Format**: Ensure database dates are in YYYY-MM-DD format
-5. **Check participant_id**: Ensure entries have correct participant_id values
+1. **Verify API Response**: Check if `/api/entries` returns data
+2. **Check Database Connection**: Ensure Supabase credentials are correct
+3. **Verify Date Format**: Ensure database dates are in YYYY-MM-DD format
+4. **Check participant_id**: Ensure entries have correct participant_id values
 
 ## Technical Details
 
