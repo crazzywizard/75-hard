@@ -82,7 +82,7 @@ const SetupChallenge: React.FC<SetupChallengeProps> = ({
         <div className="flex items-end">
           <button
             onClick={startChallenge}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white py-2 px-4 rounded-md transition-colors disabled:bg-blue-300 dark:disabled:bg-blue-500 disabled:cursor-not-allowed"
             disabled={isButtonDisabled}
           >
             Start Challenge

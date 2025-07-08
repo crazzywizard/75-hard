@@ -39,7 +39,7 @@ const InstallPWAButton: React.FC = () => {
   return (
     <button
       onClick={handleInstallClick}
-      className="fixed bottom-6 right-6 z-50 px-6 py-3 bg-blue-600 text-white rounded-lg shadow-lg font-semibold hover:bg-blue-700 transition"
+      className="fixed bottom-6 right-6 z-50 px-6 py-3 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-lg shadow-lg font-semibold transition"
     >
       Install App
     </button>
