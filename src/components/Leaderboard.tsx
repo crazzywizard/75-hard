@@ -20,7 +20,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
   const [selectedMetric, setSelectedMetric] = useState<MetricType>('steps');
   const [selectedTimePeriod, setSelectedTimePeriod] = useState<TimePeriodType>('week');
 
-  // Get the current week's date range (Monday to Sunday)
+  // Get the current week's date range (Monday to Sunday) as date strings
   const getCurrentWeekRange = () => {
     const now = new Date();
     const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
@@ -28,13 +28,22 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
     
     const monday = new Date(now);
     monday.setDate(now.getDate() + mondayOffset);
-    monday.setHours(0, 0, 0, 0);
     
     const sunday = new Date(monday);
     sunday.setDate(monday.getDate() + 6);
-    sunday.setHours(23, 59, 59, 999);
     
-    return { monday, sunday };
+    // Format as YYYY-MM-DD strings to match database format
+    const formatDate = (date: Date): string => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    
+    return { 
+      mondayStr: formatDate(monday), 
+      sundayStr: formatDate(sunday) 
+    };
   };
 
   // Calculate totals based on selected time period
@@ -43,10 +52,10 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
     
     // Filter entries based on time period
     if (selectedTimePeriod === 'week') {
-      const { monday, sunday } = getCurrentWeekRange();
+      const { mondayStr, sundayStr } = getCurrentWeekRange();
       filteredEntries = entries.filter(entry => {
-        const entryDate = new Date(entry.date);
-        return entryDate >= monday && entryDate <= sunday;
+        // Compare date strings directly to avoid timezone issues
+        return entry.date >= mondayStr && entry.date <= sundayStr;
       });
     }
     // For 'alltime', we use all entries without filtering
@@ -136,12 +145,15 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
   // Get time period info
   const getTimePeriodInfo = () => {
     if (selectedTimePeriod === 'week') {
-      const { monday, sunday } = getCurrentWeekRange();
+      const { mondayStr, sundayStr } = getCurrentWeekRange();
+      // Convert back to Date objects for display formatting
+      const mondayDate = new Date(mondayStr);
+      const sundayDate = new Date(sundayStr);
       const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-      const mondayStr = monday.toLocaleDateString('en-US', options);
-      const sundayStr = sunday.toLocaleDateString('en-US', options);
+      const mondayDisplay = mondayDate.toLocaleDateString('en-US', options);
+      const sundayDisplay = sundayDate.toLocaleDateString('en-US', options);
       return {
-        label: `Week of ${mondayStr} - ${sundayStr}`,
+        label: `Week of ${mondayDisplay} - ${sundayDisplay}`,
         totalLabel: `Total ${selectedMetric === 'steps' ? 'Steps' : 'Calories'} This Week`,
         averageLabel: `Average ${selectedMetric === 'steps' ? 'Steps' : 'Calories'}`,
         highestLabel: 'Highest This Week',
