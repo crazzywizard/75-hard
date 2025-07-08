@@ -9,11 +9,7 @@ The leaderboard was showing zero steps for today even though entries exist in th
 - **Problem**: The `getCurrentWeekRange()` function was creating Date objects with specific hours/minutes, but comparing them with `new Date(entry.date)` caused timezone inconsistencies.
 - **Solution**: Changed to string-based date comparison using YYYY-MM-DD format.
 
-### 2. **Incorrect Supabase Configuration**
-- **Problem**: `src/lib/supabase.ts` was using `SUPABASE_SERVICE_ROLE_KEY` instead of `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
-- **Solution**: Fixed the environment variable name.
-
-### 3. **Missing Environment Variables**
+### 2. **Missing Environment Variables**
 - **Problem**: No `.env.local` file existed for database connection.
 - **Solution**: Created template `.env.local` file.
 
@@ -35,18 +31,8 @@ const getCurrentWeekRange = () => {
 };
 ```
 
-### 2. Fixed Supabase Configuration (`src/lib/supabase.ts`)
-```typescript
-// OLD:
-process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-
-// NEW:
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-```
-
-### 3. Added Debug Tools
+### 2. Added Debug Tools
 - **DebugInfo component**: Shows raw data from database to help diagnose issues
-- **Console logging**: Added to leaderboard calculation and data fetching
 - **Visual debug panel**: Shows today's entries, this week's entries, and participant data
 
 ## What You Need to Do
@@ -55,7 +41,7 @@ process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 Replace the placeholder values in `.env.local` with your actual Supabase credentials:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=your_actual_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_actual_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_actual_supabase_service_role_key
 ```
 
 ### 2. **Test the Fix**
