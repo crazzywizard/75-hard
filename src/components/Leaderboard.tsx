@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { DayEntry } from './EntriesTable';
 import { Participant } from './ParticipantSelector';
+import { toTitleCase } from '../utils/textFormatting';
 
 interface LeaderboardProps {
   entries: DayEntry[];
@@ -259,7 +260,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ entries, participants }) => {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    {entry.participant.user_id}
+                    {toTitleCase(entry.participant.user_id)}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
                     {timePeriodInfo.entryLabel}
