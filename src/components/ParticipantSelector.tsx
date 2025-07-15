@@ -1,4 +1,5 @@
 import React from 'react';
+import { toTitleCase } from '../utils/textFormatting';
 
 export interface Participant {
   id: string | number;
@@ -34,7 +35,7 @@ const ParticipantSelector: React.FC<ParticipantSelectorProps> = ({
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
           }`}
         >
-          {participant.user_id}
+          {toTitleCase(participant.user_id)}
         </button>
       ))}
     </div>

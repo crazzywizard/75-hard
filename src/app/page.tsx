@@ -13,6 +13,7 @@ import { ThemeSwitcher } from '../components/ThemeSwitcher';
 import AddParticipantForm from '../components/AddParticipantForm';
 import EndWeightForm from '../components/EndWeightForm';
 import Leaderboard from '../components/Leaderboard';
+import { toTitleCase } from '../utils/textFormatting';
 
 export default function Home() {
   const [entries, setEntries] = useState<DayEntry[]>([]);
@@ -378,7 +379,7 @@ export default function Home() {
         ) : loadingParticipantData ? (
           <div className="text-center py-10">
             <p className="text-xl text-gray-700 dark:text-gray-300">
-              Loading {currentParticipant.user_id}&apos;s challenge...
+              Loading {toTitleCase(currentParticipant.user_id)}&apos;s challenge...
             </p>
           </div>
         ) : (
